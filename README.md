@@ -15,120 +15,84 @@
 
 ## 安装
 
-### 通用说明
+本技能包遵循 [Agent Skills](https://agentskills.io) 开放标准，每个技能是一个含 `SKILL.md` 的目录，Claude Code、opencode、Cursor、Cline、Codex 等主流 AI agent 均原生支持。
 
-- 技能采用 `SKILL.md` frontmatter 约定，兼容所有支持该约定的 AI agent。
-- **两种作用域：**
-  - **全局**：装一次，所有项目都能用（放在用户主目录下的技能目录）。
-  - **项目级**：只在当前项目可用（放在项目根目录的隐藏配置目录里），适合团队共享。
-- **通用做法：** `git clone` 本仓库，再把 `skills/<技能名>` 目录复制（或建符号链接）到目标 agent 的技能目录。
+### 推荐方式：`npx skills add`（统一安装）
 
-### Claude Code（已验证）
+使用官方 [skills CLI](https://github.com/vercel-labs/skills) 一条命令装到任意主流 agent，无需手动 clone 或复制目录。CLI 会自动探测本机已安装的 agent 并写入对应技能目录。
 
-技能目录：
-
-- 全局：`~/.claude/skills/`
-- 项目级：`<项目根>/.claude/skills/`
-
-安装全部技能（全局）：
+**安装全部技能（项目级，随项目共享给团队）：**
 
 ```bash
-git clone https://github.com/xiao0916/luckyxp-wf.git ~/.claude/skills/achievement
+npx skills add https://github.com/xiao0916/luckyxp-wf.git
 ```
 
-或只装单个技能：
+**安装全部技能（全局，所有项目可用）：**
 
 ```bash
-git clone https://github.com/xiao0916/luckyxp-wf.git /tmp/achievement
-cp -r /tmp/achievement/skills/animation-flow ~/.claude/skills/
-cp -r /tmp/achievement/skills/dev-workflow ~/.claude/skills/
+npx skills add https://github.com/xiao0916/luckyxp-wf.git --global
 ```
 
-项目级同理，把目标路径换成 `<项目根>/.claude/skills/`。
-
-**验证：** 启动 Claude Code 后，技能会自动出现在可用技能列表中，按描述关键词触发。
-
-### opencode（已验证）
-
-技能目录：
-
-- 全局：`~/.config/opencode/skills/`
-- 项目级：`<项目根>/.opencode/skills/`
-
-安装全部技能（全局）：
+**指定装到某个 agent：**
 
 ```bash
-git clone https://github.com/xiao0916/luckyxp-wf.git ~/.config/opencode/skills/achievement
+npx skills add https://github.com/xiao0916/luckyxp-wf.git --agent claude-code
 ```
 
-只装单个技能：同 Claude Code 的 `cp -r` 方式，目标路径改为 `~/.config/opencode/skills/`。
+`--agent` 取值如 `claude-code` / `opencode` / `cursor` / `cline` / `codex`；用 `--agent '*'` 装到所有已探测到的 agent。
 
-**验证：** 启动 opencode 后，技能按 `description` 中的关键词自动触发。
-
-### Cursor（约定路径，以官方文档为准）
-
-> Cursor 对 `SKILL.md` 技能约定的原生支持请以其最新官方文档为准。下述为社区常用约定路径。
-
-技能目录（约定）：
-
-- 全局：`~/.cursor/skills/`
-- 项目级：`<项目根>/.cursor/skills/`
-
-安装（全局）：
+**只装单个技能：**
 
 ```bash
-git clone https://github.com/xiao0916/luckyxp-wf.git ~/.cursor/skills/achievement
+npx skills add https://github.com/xiao0916/luckyxp-wf.git --skill animation-flow
+npx skills add https://github.com/xiao0916/luckyxp-wf.git --skill dev-workflow
 ```
 
-若 Cursor 使用的是 rules 而非 skills，可把 `SKILL.md` 内容作为规则引入，或查阅其最新技能/扩展机制文档。
-
-### Cline（约定路径，以官方文档为准）
-
-> Cline 对 `SKILL.md` 技能约定的原生支持请以其最新官方文档为准。
-
-技能目录（约定）：
-
-- 全局：`~/.cline/skills/`
-- 项目级：`<项目根>/.cline/skills/`
-
-安装（全局）：
+**一键装全部技能到全部 agent：**
 
 ```bash
-git clone https://github.com/xiao0916/luckyxp-wf.git ~/.cline/skills/achievement
+npx skills add https://github.com/xiao0916/luckyxp-wf.git --all
 ```
 
-### Codex（约定路径，以官方文档为准）
+**其它常用命令：**
 
-> OpenAI Codex CLI 对 `SKILL.md` 技能约定的原生支持请以其最新官方文档为准。
+```bash
+npx skills list              # 查看已安装技能
+npx skills update            # 更新到最新版本
+npx skills remove            # 卸载技能
+npx skills add <仓库> -l      # 只列出仓库内可用技能，不安装
+```
 
-若 Codex 支持自定义技能/插件目录，按其文档指定的路径执行类似的 `git clone` + 复制流程；否则可将 `SKILL.md` 内容作为系统提示/配置引入。
+### 备选方式：git clone 手动安装
 
----
-
-## 仅安装单个技能
-
-不想装全部时，只需把对应技能目录单独复制到目标 agent 的技能目录：
+若无法使用 npx，可手动克隆并把 `skills/<技能名>` 目录复制（或建符号链接）到目标 agent 的技能目录：
 
 ```bash
 git clone https://github.com/xiao0916/luckyxp-wf.git /tmp/achievement
-cp -r /tmp/achievement/skills/<技能名> <目标 agent 技能目录>/
+cp -r /tmp/achievement/skills/animation-flow <目标 agent 技能目录>/
+cp -r /tmp/achievement/skills/dev-workflow  <目标 agent 技能目录>/
 ```
 
-`<技能名>` 取 `animation-flow` 或 `dev-workflow`。
+各 agent 约定技能目录（全局 / 项目级）：
+
+| Agent | 全局目录 | 项目级目录 |
+|-------|---------|-----------|
+| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
+| opencode | `~/.config/opencode/skills/` | `.opencode/skills/` |
+| Cursor | `~/.cursor/skills/` | `.cursor/skills/` |
+| Cline | `~/.cline/skills/` | `.cline/skills/` |
+| Codex | `~/.agents/skills/` | `.agents/skills/` |
+
+> 多数 agent 还会额外读取 `.agents/skills/` 或 `.claude/skills/`，跨 agent 复用同一目录即可。
 
 ## 更新
 
-已通过复制方式安装的，更新源仓库后重新复制即可：
-
-```bash
-cd <克隆目录> && git pull
-cp -r skills/* <目标 agent 技能目录>/
-```
-
-通过符号链接安装的，`git pull` 后即时生效，无需额外操作。
+- `npx skills` 安装的：执行 `npx skills update`。
+- git clone 安装的：`cd <克隆目录> && git pull`，再重新复制（或符号链接方式 `git pull` 后即时生效）。
 
 ## 备注
 
 - 仓库地址：https://github.com/xiao0916/luckyxp-wf.git
-- 各 agent 的技能目录路径基于 2026-06 时的约定；Cursor / Cline / Codex 的原生支持以各自官方文档为准。
+- `npx skills add` 由 [vercel-labs/skills](https://github.com/vercel-labs/skills) 提供，支持 60+ 主流 AI agent，详见其 README。
+- 手动安装的目录路径基于各 agent 官方文档（2026-06），个别 agent 可能还会额外读取 `.agents/skills/` 或 `.claude/skills/`。
 - Windows 用户把 `~` 理解为用户主目录（如 `C:\Users\<用户名>`），`cp -r` 换成 `Copy-Item -Recurse`。
