@@ -1,4 +1,4 @@
-# Achievement 技能包
+# luckyxp-wf
 
 一组面向 AI agent 的可复用技能（skills），采用 `SKILL.md` frontmatter 约定（`name` / `description`）。每个技能是一个自包含目录，包含触发描述、工作流说明与辅助资源。
 
