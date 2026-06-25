@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>定屏滚动效果</title>
+    <!-- gsap CDN：仅用于预览，转换时改为 npm 安装（如 pnpm add gsap） -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .fixed-scroll-section {
+            display: flex;
+            min-height: 200vh;
+            position: relative;
+        }
+
+        .fixed-left {
+            flex: 0 0 50%;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 80px 60px;
+            background: linear-gradient(
+                180deg,
+                #f0f7f0 0%,
+                #e8f5e9 40%,
+                #f5f7fa 100%
+            );
+            z-index: 10;
+        }
+
+        .section-title {
+            font-size: 42px;
+            font-weight: 700;
+            color: #1a6b3c;
+            margin-bottom: 16px;
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: #4a5568;
+        }
+
+        .scroll-right {
+            flex: 1;
+            padding: 40px 60px 40px 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: auto auto;
+            gap: 30px;
+            align-content: center;
+        }
+
+        .culture-card {
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: 4/5;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            cursor: default;
+            transition:
+                transform 0.4s ease,
+                box-shadow 0.4s ease;
+        }
+
+        .culture-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+        }
+
+        /* 4 卡片错落：第 1 张下压、第 4 张上提，形成视差错位（效果的一部分，转换时保留） */
+        .scroll-right .culture-card:nth-child(1) {
+            margin-top: 160px;
+        }
+
+        .scroll-right .culture-card:nth-child(2) {
+            margin-top: 0;
+        }
+
+        .scroll-right .culture-card:nth-child(3) {
+            margin-top: 0;
+        }
+
+        .scroll-right .culture-card:nth-child(4) {
+            margin-top: -160px;
+        }
+
+        .culture-card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .culture-card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(
+                to top,
+                rgba(0, 0, 0, 0.5) 0%,
+                transparent 100%
+            );
+            pointer-events: none;
+        }
+
+        .culture-card-title {
+            position: absolute;
+            bottom: 28px;
+            left: 28px;
+            color: white;
+            font-size: 22px;
+            font-weight: 600;
+            z-index: 2;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 响应式：窄屏改为纵向布局，左侧不再 sticky，恢复正常流，单列卡片 */
+        @media (max-width: 768px) {
+            .fixed-scroll-section {
+                flex-direction: column;
+                min-height: auto;
+            }
+
+            .fixed-left {
+                position: static;
+                height: auto;
+                padding: 48px 24px;
+                flex: none;
+            }
+
+            .scroll-right {
+                padding: 24px;
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            /* 纵向布局下取消错落，避免负 margin 导致重叠 */
+            .scroll-right .culture-card:nth-child(1),
+            .scroll-right .culture-card:nth-child(2),
+            .scroll-right .culture-card:nth-child(3),
+            .scroll-right .culture-card:nth-child(4) {
+                margin-top: 0;
+            }
+        }
+
+        /* prefers-reduced-motion：禁用 hover transform 过渡（gsap 动画由 JS 内单独判断） */
+        @media (prefers-reduced-motion: reduce) {
+            .culture-card {
+                transition: none !important;
+            }
+            .culture-card:hover {
+                transform: none;
+            }
+            .scroll-right .culture-card:nth-child(1),
+            .scroll-right .culture-card:nth-child(2),
+            .scroll-right .culture-card:nth-child(3),
+            .scroll-right .culture-card:nth-child(4) {
+                margin-top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="fixed-scroll-section" data-component="fixed-scroll">
+        <div class="fixed-left" data-title="企业文化" data-subtitle="以德兴企、以科创赋能">
+            <h2 class="section-title">企业文化</h2>
+            <p class="section-subtitle">以德兴企、以科创赋能</p>
+        </div>
+        <div class="scroll-right">
+            <div class="culture-card"
+                 data-image="https://picsum.photos/seed/recycle/500/625"
+                 data-card-title="发展使命">
+                <img
+                    src="https://picsum.photos/seed/recycle/500/625"
+                    alt="发展使命"
+                    class="culture-card-image"
+                />
+                <div class="culture-card-overlay"></div>
+                <div class="culture-card-title">发展使命</div>
+            </div>
+            <div class="culture-card"
+                 data-image="https://picsum.photos/seed/paperplane/500/625"
+                 data-card-title="发展愿景">
+                <img
+                    src="https://picsum.photos/seed/paperplane/500/625"
+                    alt="发展愿景"
+                    class="culture-card-image"
+                />
+                <div class="culture-card-overlay"></div>
+                <div class="culture-card-title">发展愿景</div>
+            </div>
+            <div class="culture-card"
+                 data-image="https://picsum.photos/seed/sunflower/500/625"
+                 data-card-title="管理理念">
+                <img
+                    src="https://picsum.photos/seed/sunflower/500/625"
+                    alt="管理理念"
+                    class="culture-card-image"
+                />
+                <div class="culture-card-overlay"></div>
+                <div class="culture-card-title">管理理念</div>
+            </div>
+            <div class="culture-card"
+                 data-image="https://picsum.photos/seed/teamwork/500/625"
+                 data-card-title="经营理念">
+                <img
+                    src="https://picsum.photos/seed/teamwork/500/625"
+                    alt="经营理念"
+                    class="culture-card-image"
+                />
+                <div class="culture-card-overlay"></div>
+                <div class="culture-card-title">经营理念</div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // 数据契约映射（README schema ↔ 本文件）:
+        //   title      → .fixed-left[data-title] / .section-title 文本
+        //   subtitle   → .fixed-left[data-subtitle] / .section-subtitle 文本
+        //   image      → .culture-card[data-image] / .culture-card-image[src]
+        //   card.title → .culture-card[data-card-title] / .culture-card-title 文本
+        // 可调参数:
+        //   scrollOffset → SCROLL_OFFSET
+        //   className    → .fixed-scroll-section 的额外 class（转换时由 AI 注入）
+        // 依赖: gsap + ScrollTrigger（CDN 仅用于预览，转换时改为 npm 安装）
+        const SCROLL_OFFSET = -200; // 可调：右侧滚动位移(px)
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        const scrollRight = document.querySelector(".scroll-right");
+
+        // 尊重 prefers-reduced-motion：reduce 时跳过 gsap 动画，右侧保持原位（终值 y=0）
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reduceMotion) {
+            gsap.to(scrollRight, {
+                y: SCROLL_OFFSET,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: ".fixed-scroll-section",
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 2,
+                },
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手风琴效果</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 60px 40px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #16a34a;
+            margin-bottom: 12px;
+        }
+
+        .section-title p {
+            font-size: 16px;
+            color: #718096;
+        }
+
+        .accordion-container {
+            display: flex;
+            height: 500px;
+            gap: 12px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .accordion-item {
+            flex: 1;
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: flex 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .accordion-item.active {
+            flex: 2.5;
+        }
+
+        .accordion-item:focus-visible {
+            outline: 3px solid #16a34a;
+            outline-offset: 2px;
+        }
+
+        .accordion-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .accordion-item.active .accordion-bg {
+            transform: scale(1.1);
+        }
+
+        .accordion-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .accordion-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to top,
+                rgba(0, 0, 0, 0.7) 0%,
+                rgba(0, 0, 0, 0.2) 50%,
+                rgba(0, 0, 0, 0.1) 100%
+            );
+            transition: background 0.3s ease;
+        }
+
+        .accordion-item.active .accordion-overlay {
+            background: linear-gradient(
+                to top,
+                rgba(0, 0, 0, 0.8) 0%,
+                rgba(0, 0, 0, 0.3) 60%,
+                rgba(0, 0, 0, 0.1) 100%
+            );
+        }
+
+        .accordion-content {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            /* 注意：此 calc 假设 4 项（gap 36px=3×12px，flex 比例 2.5+1×3=5.5）。项数变化时需重算 */
+            width: calc(((min(100vw, 1400px) - 80px - 36px) / 5.5) * 2.5);
+            color: white;
+            z-index: 2;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .accordion-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            transition: transform 0.4s ease;
+        }
+
+        .accordion-desc {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            transform: translateY(20px);
+        }
+
+        .accordion-item.active .accordion-title {
+            transform: translateY(-10px);
+        }
+
+        .accordion-item.active .accordion-desc {
+            opacity: 1;
+            max-height: 100px;
+            transform: translateY(-10px);
+        }
+
+        /* 响应式：窄屏改为纵向排列（高度由 JS 接管，CSS 仅切换方向与单项尺寸） */
+        @media (max-width: 768px) {
+            .accordion-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .accordion-item {
+                flex: none;
+                height: 80px;
+                transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .accordion-item.active {
+                flex: none;
+                height: 220px;
+            }
+            .accordion-content {
+                width: 90%;
+            }
+        }
+
+        /* prefers-reduced-motion：禁用 flex 过渡与 transform 动画，仅保留静态样式 */
+        @media (prefers-reduced-motion: reduce) {
+            .accordion-item,
+            .accordion-bg,
+            .accordion-overlay,
+            .accordion-title,
+            .accordion-desc {
+                transition: none !important;
+                animation: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="section-title">
+        <h2>核心产品</h2>
+        <p>悬停或按 Enter/Space 展开详情</p>
+    </div>
+
+    <div class="accordion-container" data-component="accordion">
+        <div class="accordion-item"
+             data-image="https://picsum.photos/400/500?random=10"
+             data-title="生物发酵饲料"
+             data-desc="守护畜禽健康生长，提供高品质的生物发酵饲料产品"
+             role="button"
+             tabindex="0"
+             aria-expanded="true"
+             aria-label="生物发酵饲料 - 悬停或按 Enter/Space 展开详情">
+            <img src="https://picsum.photos/400/500?random=10" alt="生物发酵饲料" class="accordion-bg">
+            <div class="accordion-overlay"></div>
+            <div class="accordion-content">
+                <div class="accordion-title">生物发酵饲料</div>
+                <div class="accordion-desc">守护畜禽健康生长，提供高品质的生物发酵饲料产品</div>
+            </div>
+        </div>
+
+        <div class="accordion-item"
+             data-image="https://picsum.photos/400/500?random=11"
+             data-title="功能肽"
+             data-desc="为畜禽肠道健康高效赋能，提升免疫力和生长性能"
+             role="button"
+             tabindex="0"
+             aria-expanded="false"
+             aria-label="功能肽 - 悬停或按 Enter/Space 展开详情">
+            <img src="https://picsum.photos/400/500?random=11" alt="功能肽" class="accordion-bg">
+            <div class="accordion-overlay"></div>
+            <div class="accordion-content">
+                <div class="accordion-title">功能肽</div>
+                <div class="accordion-desc">为畜禽肠道健康高效赋能，提升免疫力和生长性能</div>
+            </div>
+        </div>
+
+        <div class="accordion-item"
+             data-image="https://picsum.photos/400/500?random=12"
+             data-title="生物活性物"
+             data-desc="天然活性成分，促进动物健康生长"
+             role="button"
+             tabindex="0"
+             aria-expanded="false"
+             aria-label="生物活性物 - 悬停或按 Enter/Space 展开详情">
+            <img src="https://picsum.photos/400/500?random=12" alt="生物活性物" class="accordion-bg">
+            <div class="accordion-overlay"></div>
+            <div class="accordion-content">
+                <div class="accordion-title">生物活性物</div>
+                <div class="accordion-desc">天然活性成分，促进动物健康生长</div>
+            </div>
+        </div>
+
+        <div class="accordion-item"
+             data-image="https://picsum.photos/400/500?random=13"
+             data-title="功能性营养剂"
+             data-desc="科学配方，全面补充营养需求"
+             role="button"
+             tabindex="0"
+             aria-expanded="false"
+             aria-label="功能性营养剂 - 悬停或按 Enter/Space 展开详情">
+            <img src="https://picsum.photos/400/500?random=13" alt="功能性营养剂" class="accordion-bg">
+            <div class="accordion-overlay"></div>
+            <div class="accordion-content">
+                <div class="accordion-title">功能性营养剂</div>
+                <div class="accordion-desc">科学配方，全面补充营养需求</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 数据契约映射（README schema ↔ 本文件）:
+        //   image       → .accordion-item[data-image] / .accordion-bg[src]
+        //   title       → .accordion-item[data-title] / .accordion-title 文本
+        //   description → .accordion-item[data-desc] / .accordion-desc 文本
+        // 可调参数:
+        //   height    → CONTAINER_HEIGHT
+        //   className → .accordion-container 的额外 class（转换时由 AI 注入）
+        const CONTAINER_HEIGHT = 500; // 可调：容器高度(px)
+
+        // 容器高度由 JS 独占控制：窄屏由 CSS 媒体查询接管（纵向排列，高度自适应）
+        const container = document.querySelector('.accordion-container');
+        const mobileMQ = window.matchMedia('(max-width: 768px)');
+        function applyHeight() {
+            if (mobileMQ.matches) {
+                container.style.height = '';
+            } else {
+                container.style.height = `${CONTAINER_HEIGHT}px`;
+            }
+        }
+        applyHeight();
+        mobileMQ.addEventListener('change', applyHeight);
+
+        const items = document.querySelectorAll('.accordion-item');
+
+        // 统一切换逻辑：同步 active class 与 aria-expanded，保证屏幕阅读器可感知展开状态
+        function setActive(activeItem) {
+            items.forEach(i => {
+                i.classList.remove('active');
+                i.setAttribute('aria-expanded', 'false');
+            });
+            activeItem.classList.add('active');
+            activeItem.setAttribute('aria-expanded', 'true');
+        }
+
+        // 默认展开第一项
+        setActive(items[0]);
+
+        // 鼠标移入时展开对应项，移出时不收起
+        items.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                setActive(this);
+            });
+        });
+
+        // 键盘支持：Enter/Space 切换展开
+        items.forEach(item => {
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setActive(item);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

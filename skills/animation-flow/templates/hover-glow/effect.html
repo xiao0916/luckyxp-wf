@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hover光效</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 80px 40px;
+        }
+
+        .products-grid {
+            display: grid;
+            gap: 12px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            position: relative;
+            display: block;
+            overflow: hidden;
+            background: rgb(245, 247, 250);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            isolation: isolate;
+            transform-style: preserve-3d;
+            transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform;
+            --pointer-x: 0;
+            --pointer-y: 0;
+        }
+
+        /* 扫光效果 + 径向光效 */
+        .product-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background: 
+                linear-gradient(120deg, transparent 0%, rgba(255,255,255,.72) 46%, transparent 58%),
+                radial-gradient(circle at calc(50% + var(--pointer-x) * 22%) calc(22% + var(--pointer-y) * 18%), rgba(19,174,244,.18), transparent 32%);
+            opacity: 0;
+            transform: translate(-42%) skew(-10deg);
+            transition: opacity 0.36s, transform 0.66s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .product-card:hover::before {
+            opacity: 1;
+            transform: translate(42%) skew(-10deg);
+        }
+
+        /* 边框 + 内阴影 */
+        .product-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            border: 1px solid rgba(19, 174, 244, 0);
+            transition: border-color 0.36s, box-shadow 0.36s;
+        }
+
+        .product-card:hover::after {
+            border-color: rgba(19, 174, 244, 0.28);
+            box-shadow: rgba(19, 174, 244, 0.1) 0px 0px 30px inset;
+        }
+
+        .product-card:hover {
+            box-shadow: rgba(13, 55, 91, 0.16) 0px 25px 55px;
+        }
+
+        .product-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .product-image {
+            display: block;
+            width: 100%;
+            aspect-ratio: 891 / 670;
+            object-fit: cover;
+            transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s;
+        }
+
+        .product-card:hover .product-image {
+            filter: saturate(1.08) brightness(1.04);
+            transform: scale(1.07);
+        }
+
+        .product-content {
+            position: absolute;
+            left: 50%;
+            z-index: 2;
+            transform: translate(-50%);
+            top: 60px;
+            text-align: center;
+            color: rgb(17, 24, 39);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .product-card:hover .product-content {
+            transform: translate(-50%) translateY(-8px);
+        }
+
+        .product-title {
+            font-size: 30px;
+            font-weight: 500;
+            color: rgb(51, 51, 51);
+            margin-bottom: 12px;
+        }
+
+        .product-desc {
+            font-size: 15px;
+            color: rgb(51, 51, 51);
+            margin: 20px 0 25px;
+        }
+
+        .product-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            width: 80px;
+            height: 28px;
+            line-height: 28px;
+            color: rgb(102, 102, 102);
+            font-size: 14px;
+            font-style: normal;
+        }
+
+        .product-link::after {
+            content: '>';
+            margin-left: 10px;
+            transition: transform 0.28s;
+        }
+
+        .product-card:hover .product-link::after {
+            transform: translate(5px);
+        }
+
+        /* 响应式：窄屏改为单列（no-JS fallback；JS 启用时由 applyColumns 接管） */
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* prefers-reduced-motion：禁用所有过渡与动画，仅保留静态样式 */
+        @media (prefers-reduced-motion: reduce) {
+            .product-card,
+            .product-card::before,
+            .product-card::after,
+            .product-image,
+            .product-content,
+            .product-link::after {
+                transition: none !important;
+                animation: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="products-grid" data-component="hover-glow">
+        <a href="#" class="product-card" id="card1"
+           aria-label="工业级手持扫描系统 - 了解更多"
+           data-image="https://picsum.photos/600/450?grayscale&blur=1"
+           data-title="工业级手持扫描系统"
+           data-desc="集大成之作 测无止境"
+           data-link="#">
+            <div class="product-image-wrapper">
+                <img src="https://picsum.photos/600/450?grayscale&blur=1" alt="工业级手持扫描系统" class="product-image">
+            </div>
+            <div class="product-content">
+                <div class="product-title">工业级手持扫描系统</div>
+                <div class="product-desc">集大成之作 测无止境</div>
+                <div class="product-link">了解更多</div>
+            </div>
+        </a>
+
+        <a href="#" class="product-card" id="card2"
+           aria-label="全域无线光学追踪系统 - 了解更多"
+           data-image="https://picsum.photos/600/450?grayscale&blur=2"
+           data-title="全域无线光学追踪系统"
+           data-desc="致新无界 致速无限"
+           data-link="#">
+            <div class="product-image-wrapper">
+                <img src="https://picsum.photos/600/450?grayscale&blur=2" alt="全域无线光学追踪系统" class="product-image">
+            </div>
+            <div class="product-content">
+                <div class="product-title">全域无线光学追踪系统</div>
+                <div class="product-desc">致新无界 致速无限</div>
+                <div class="product-link">了解更多</div>
+            </div>
+        </a>
+
+        <a href="#" class="product-card" id="card3"
+           aria-label="智能反向定位系统 - 了解更多"
+           data-image="https://picsum.photos/600/450?grayscale&blur=1"
+           data-title="智能反向定位系统"
+           data-desc="全球首创不跟踪不贴点手持激光扫描模式"
+           data-link="#">
+            <div class="product-image-wrapper">
+                <img src="https://picsum.photos/600/450?grayscale&blur=1" alt="智能反向定位系统" class="product-image">
+            </div>
+            <div class="product-content">
+                <div class="product-title">智能反向定位系统</div>
+                <div class="product-desc">全球首创不跟踪不贴点手持激光扫描模式</div>
+                <div class="product-link">了解更多</div>
+            </div>
+        </a>
+
+        <a href="#" class="product-card" id="card4"
+           aria-label="自动化在线检测系统 - 了解更多"
+           data-image="https://picsum.photos/600/450?grayscale&blur=2"
+           data-title="自动化在线检测系统"
+           data-desc="高精度机器人自动化测量系统"
+           data-link="#">
+            <div class="product-image-wrapper">
+                <img src="https://picsum.photos/600/450?grayscale&blur=2" alt="自动化在线检测系统" class="product-image">
+            </div>
+            <div class="product-content">
+                <div class="product-title">自动化在线检测系统</div>
+                <div class="product-desc">高精度机器人自动化测量系统</div>
+                <div class="product-link">了解更多</div>
+            </div>
+        </a>
+    </div>
+
+    <script>
+        // 数据契约映射（README schema ↔ 本文件）:
+        //   image       → .product-card[data-image] / .product-image[src]
+        //   title       → .product-card[data-title] / .product-title 文本
+        //   description → .product-card[data-desc] / .product-desc 文本
+        //   link        → .product-card[data-link] / <a>[href]
+        // 可调参数:
+        //   columns  → COLUMNS
+        //   className → .products-grid 的额外 class（转换时由 AI 注入）
+        const COLUMNS = 2; // 可调：网格列数 (2|3|4)
+        // 列数由 JS 独占控制：窄屏强制 1 列，否则用 COLUMNS
+        const grid = document.querySelector('.products-grid');
+        const mobileMQ = window.matchMedia('(max-width: 768px)');
+        function applyColumns() {
+            const isMobile = mobileMQ.matches;
+            grid.style.gridTemplateColumns = `repeat(${isMobile ? 1 : COLUMNS}, 1fr)`;
+        }
+        applyColumns();
+        mobileMQ.addEventListener('change', applyColumns);
+
+        // 鼠标位置跟踪
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const y = (e.clientY - rect.top) / rect.height;
+                
+                card.style.setProperty('--pointer-x', x);
+                card.style.setProperty('--pointer-y', y);
+            });
+        });
+    </script>
+</body>
+</html>

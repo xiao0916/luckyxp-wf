@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文字打字效果</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .typewriter-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 48px 64px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 720px;
+            width: 100%;
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27ca3f; }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            margin-right: 44px;
+        }
+
+        .typewriter-text {
+            font-size: 32px;
+            font-weight: 600;
+            color: #00d9ff;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 3px;
+            height: 36px;
+            background: #00d9ff;
+            margin-left: 4px;
+            animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .restart-btn {
+            margin-top: 36px;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #00d9ff 0%, #00ff88 100%);
+            border: none;
+            border-radius: 8px;
+            color: #1a1a2e;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 217, 255, 0.3);
+        }
+
+        .restart-btn:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 640px) {
+            .typewriter-container {
+                padding: 32px 24px;
+            }
+
+            .typewriter-text {
+                font-size: 24px;
+            }
+
+            .cursor {
+                height: 28px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .cursor {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="typewriter-container">
+        <div class="terminal-header">
+            <div class="terminal-dot dot-red"></div>
+            <div class="terminal-dot dot-yellow"></div>
+            <div class="terminal-dot dot-green"></div>
+            <div class="terminal-title">typewriter-effect</div>
+        </div>
+
+        <div class="typewriter-text">
+            <span id="typewriter"></span><span class="cursor"></span>
+        </div>
+
+        <button class="restart-btn" id="restartBtn">重新播放</button>
+    </div>
+
+    <script>
+        // 可配置参数（与 README 对应）
+        const config = {
+            texts: [
+                '欢迎使用打字效果',
+                '这是一个动画演示',
+                '支持多种文字特效',
+                '逐字呈现 灵动自然'
+            ],
+            typeSpeed: 100,       // 打字速度 (ms/字符)
+            deleteSpeed: 50,      // 删除速度 (ms/字符)
+            pauseDuration: 2000,  // 打完后停留时间 (ms)
+            className: ''         // 容器自定义类名（组件层使用）
+        };
+
+        let textIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let timerId = null;
+        const typewriterElement = document.getElementById('typewriter');
+        const restartBtn = document.getElementById('restartBtn');
+
+        function type() {
+            const currentText = config.texts[textIndex];
+
+            if (isDeleting) {
+                typewriterElement.textContent = currentText.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                typewriterElement.textContent = currentText.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            let typeSpeed = isDeleting ? config.deleteSpeed : config.typeSpeed;
+
+            if (!isDeleting && charIndex === currentText.length) {
+                typeSpeed = config.pauseDuration;
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                textIndex = (textIndex + 1) % config.texts.length;
+                typeSpeed = 500;
+            }
+
+            timerId = setTimeout(type, typeSpeed);
+        }
+
+        function restartTypewriter() {
+            if (timerId) clearTimeout(timerId);
+            textIndex = 0;
+            charIndex = 0;
+            isDeleting = false;
+            typewriterElement.textContent = '';
+            timerId = setTimeout(type, 500);
+        }
+
+        restartBtn.addEventListener('click', restartTypewriter);
+
+        // 开始打字效果
+        timerId = setTimeout(type, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+{
+  "skill_name": "animation-flow",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我的公司官网需要一个数据展示区域，要展示：30+国家覆盖、5000+服务客户、99.9%系统可用性、200+合作伙伴。想要数字从0滚动到目标值的效果。",
+      "expected_output": "应匹配 number-scroll 模板，读取 effect.html + README，按探测到的框架转换为组件，数据含4项，遵循 component-spec.md 全部规范（Props驱动、完整类型、自包含样式、响应式、prefers-reduced-motion）",
+      "files": [],
+      "assertions": [
+        { "text": "匹配到 number-scroll 模板（读取 templates/number-scroll/effect.html + README.md）", "passed": false, "evidence": "" },
+        { "text": "转换后的组件含 4 项数据（30+、5000+、99.9%、200+）", "passed": false, "evidence": "" },
+        { "text": "组件 Props 驱动，示例数据只在调用方而非组件内硬编码", "passed": false, "evidence": "" },
+        { "text": "含 IntersectionObserver 在视口触发数字递增的逻辑", "passed": false, "evidence": "" },
+        { "text": "尊重 prefers-reduced-motion（降级或禁用动画）", "passed": false, "evidence": "" }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "产品展示页面，4个产品卡片要hover光效，鼠标放上去有光线扫过的感觉，每个卡片有图、标题、描述。",
+      "expected_output": "应匹配 hover-glow 模板，读取 effect.html + README，按探测到的框架转换为组件，含4项卡片数据，鼠标追踪光效+扫光，遵循 component-spec.md 全部规范",
+      "files": [],
+      "assertions": [
+        { "text": "匹配到 hover-glow 模板（读取 templates/hover-glow/effect.html + README.md）", "passed": false, "evidence": "" },
+        { "text": "转换后的组件含 4 项卡片数据（image/title/description）", "passed": false, "evidence": "" },
+        { "text": "鼠标移动追踪光效（CSS 变量或等价机制更新 --pointer-x/--pointer-y）", "passed": false, "evidence": "" },
+        { "text": "含扫光效果（线性渐变伪元素动画）", "passed": false, "evidence": "" },
+        { "text": "组件 Props 驱动，样式自包含（无外部 .css 依赖）", "passed": false, "evidence": "" }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "关于我们页面，左边固定右边滚动布局，左边写'我们的文化'标题和副标题，右边放4张带标题的图片卡片。滚动时右边内容往上走，左边保持固定。",
+      "expected_output": "应匹配 fixed-scroll 模板，读取 effect.html + README，按探测到的框架转换为组件，提示安装 gsap（按目标包管理器），遵循 component-spec.md 全部规范",
+      "files": [],
+      "assertions": [
+        { "text": "匹配到 fixed-scroll 模板（读取 templates/fixed-scroll/effect.html + README.md）", "passed": false, "evidence": "" },
+        { "text": "左侧 sticky 固定 + 右侧随滚动位移的布局", "passed": false, "evidence": "" },
+        { "text": "含 4 张图片卡片，标题为'我们的文化'+ 副标题", "passed": false, "evidence": "" },
+        { "text": "提示安装 gsap（按检测到的包管理器：npm/pnpm/yarn/bun）", "passed": false, "evidence": "" },
+        { "text": "组件 Props 驱动，含完整 TS 类型", "passed": false, "evidence": "" }
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "网站首页要一个打字机效果的标语，轮流展示几句话：'创新驱动未来'、'技术赋能产业'、'品质铸就信任'、'逐字呈现 灵动自然'，要有光标闪烁，打完停留一会再删掉切下一句。",
+      "expected_output": "应匹配 typewriter 模板，读取 effect.html + README，按探测到的框架转换为组件，含4项文本数据，打字/删除/停留循环 + 光标闪烁，遵循 component-spec.md 全部规范（响应式、prefers-reduced-motion 降级光标动画）",
+      "files": [],
+      "assertions": [
+        { "text": "匹配到 typewriter 模板（读取 templates/typewriter/effect.html + README.md）", "passed": false, "evidence": "" },
+        { "text": "转换后的组件含 4 项文本数据（'创新驱动未来'等）", "passed": false, "evidence": "" },
+        { "text": "实现打字→停留→删除→切换下一行的循环逻辑", "passed": false, "evidence": "" },
+        { "text": "含光标闪烁（CSS @keyframes blink 或等价）", "passed": false, "evidence": "" },
+        { "text": "尊重 prefers-reduced-motion（降级光标动画）", "passed": false, "evidence": "" }
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "产品类别展示，4个类别横向排列像手风琴，鼠标移到哪个哪个就展开变大显示标题和描述，其他收起。每个类别有图、标题、描述。",
+      "expected_output": "应匹配 accordion 模板，读取 effect.html + README，按探测到的框架转换为组件，含4项面板数据，悬停展开 + 默认展开第一项，遵循 component-spec.md 全部规范（响应式、可访问性、prefers-reduced-motion）",
+      "files": [],
+      "assertions": [
+        { "text": "匹配到 accordion 模板（读取 templates/accordion/effect.html + README.md）", "passed": false, "evidence": "" },
+        { "text": "转换后的组件含 4 项面板数据（image/title/description）", "passed": false, "evidence": "" },
+        { "text": "悬停展开对应面板、其他收起，默认展开第一项", "passed": false, "evidence": "" },
+        { "text": "可访问性：交互元素带 aria-label/role 或支持键盘 Enter/Space", "passed": false, "evidence": "" },
+        { "text": "尊重 prefers-reduced-motion", "passed": false, "evidence": "" }
+      ]
+    }
+  ]
+}
