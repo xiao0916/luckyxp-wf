@@ -1,0 +1,29 @@
+# 操作系统
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# 编辑器 / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 临时文件
+*.tmp
+*.log
+~$*
+
+# 环境变量与密钥
+.env
+.env.*
+*.pem
+*.key
+
+# 依赖与构建产物（如未来引入）
+node_modules/
+dist/
+build/
+.cache/
