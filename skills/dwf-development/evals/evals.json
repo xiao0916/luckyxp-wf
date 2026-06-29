@@ -1,0 +1,23 @@
+{
+  "skill_name": "dwf-development",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我生成技术方案",
+      "expected_output": "生成至少 2 个技术方案对比文档，保存到 04-技术方案/技术方案.md",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "需求拆解一下这个功能",
+      "expected_output": "生成功能拆解文档，保存到 03-需求拆解文档/需求拆解文档.md",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "创建实现清单",
+      "expected_output": "生成有序的任务清单，保存到 05-实现清单/实现清单.md",
+      "files": []
+    }
+  ]
+}
