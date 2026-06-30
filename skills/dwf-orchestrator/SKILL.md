@@ -270,6 +270,7 @@ description: "DWF 开发工作流的统一调度入口。当用户想要启动�
 3. 在该 spec 目录下写入初始化态 `_meta.json`（与 `specs` 数组中该项镜像）。
 4. 不创建项目代码目录——项目代码直接位于工作区根目录。
 5. 分派给 `dwf-requirement`（工作流模式），让它接管需求捕获与文档生成。子技能写入文档到 `.dwf/specs/{spec 目录名}/{阶段子目录}/`。
+6. 在该 spec 目录骨架创建后、分派 `dwf-requirement` 前，创建空台账 `.dwf/pending_confirmations.json`：`{"items": [], "created_at": <当前时间>, "updated_at": <当前时间>}`。
 
 ### 分派表
 
@@ -302,6 +303,8 @@ description: "DWF 开发工作流的统一调度入口。当用户想要启动�
 
 **推进到 `code` 完成后**（实现清单全部完成并验证），进入「迭代完成」收尾。
 
+推进前若该 spec 刚生成的阶段文档含非空"待确认项/待解决问题"段，按「待确认事项逐项确认循环」处理完毕后才更新 `current_step` 推进。段为空或不存在则现有行为不变。
+
 ### 拆分迭代
 
 **进入条件：** 初始化 spec 的 `breakdown` 阶段已确认，且用户在询问中同意拆分。
@@ -319,6 +322,7 @@ description: "DWF 开发工作流的统一调度入口。当用户想要启动�
 7. 用户确认后，**继续推进初始化 spec** 走完其自身 `plans → todos → code`（初始化 spec 通常产出项目脚手架与共享代码）；之后再按队列顺序依次激活兄弟 spec。
    - 如果用户希望初始化 spec 也立即停止、仅作为共享上下文不再写代码，让初始化 spec 直接进入「迭代完成」（其 `code` 视为已完成），随后激活第一个兄弟 spec。
 8. 拆分产生的身份与依赖信息权威来源是：`_meta.json` 的 `is_shared_context`/`shared_ref` + 兄弟 spec 目录的 `_context.md`。`state.json.specs` 中的 `shared_ref` 必须与上述保持一致。
+9. 此后激活首个兄弟 spec 前，按「递延项提醒」处理 `.dwf/pending_confirmations.json` 中的 deferred 项。
 
 ### 迭代完成
 
@@ -328,8 +332,9 @@ description: "DWF 开发工作流的统一调度入口。当用户想要启动�
 2. 从 `specs` 数组中移除该项，向 `completed_specs` 追加 `{ "name", "completed_at" }`。
 3. 递增 `iteration_count`。
 4. 更新 `updated_at`。
-5. 若 `specs` 数组中还有 `pending` 或 `paused` 项：用 `question` 向用户报告"已完成 X，下一个是 Y，是否继续？"用户确认后把队列中下一个 `pending` 置为 `active`、`started_at` 置当前时间，按其 `current_step` 分派子技能。
-6. 若 `specs` 数组变空：项目处于稳定态，等待用户新变更。
+5. 准备激活下一个 `pending`/恢复 `paused` 前，按「递延项提醒」处理 `.dwf/pending_confirmations.json` 中的 deferred 项；处理完毕后再继续。
+6. 若 `specs` 数组中还有 `pending` 或 `paused` 项：用 `question` 向用户报告"已完成 X，下一个是 Y，是否继续？"用户确认后把队列中下一个 `pending` 置为 `active`、`started_at` 置当前时间，按其 `current_step` 分派子技能。
+7. 若 `specs` 数组变空：项目处于稳定态，等待用户新变更。
 
 ### 新增迭代
 
@@ -341,6 +346,7 @@ description: "DWF 开发工作流的统一调度入口。当用户想要启动�
 4. 在 `state.json.specs` 数组**末尾**追加新 spec 项：`status: "pending"`、`current_step` 为第一个受影响阶段、`design_skipped` 默认 false、`selected_plan: null`、`affected_stages`、`confirmed_stages: []`、`is_shared_context: false`、`shared_ref` 若指向某完成初始化 spec 则填其名、否则 null、`started_at: null`、`completed_at: null`。
 5. 在该 spec 目录下写初始 `_meta.json`。
 6. 如果新需求被标识为高优先级、希望插队执行，走「暂停与优先插入」而非追加到末尾。
+6.5. 若 `active` spec 即将切换为本新 spec，按「递延项提醒」处理 `.dwf/pending_confirmations.json` 中的 deferred 项。
 7. 若当前无 `active` spec（队列空或仅有 `pending`），立即把新 spec 标为 `active`、`started_at` 置当前时间，按其 `current_step` 分派子技能。
 8. 用户在本 spec 内通过子技能逐阶段确认，由本技能推进 `current_step`。完成代码后走「迭代完成」。
 
@@ -354,6 +360,7 @@ description: "DWF 开发工作流的统一调度入口。当用户想要启动�
 4. 按其 `current_step` 分派对应子技能，正常走阶段推进与确认；完成后走「迭代完成」从队列移除。
 5. 优先 spec 完成并被移除后，本技能用 `question` 询问"是否恢复 X（之前暂停的 spec）？"。用户确认后，把该 `paused` spec 的 `status` 改回 `active`、清除 `paused_at`/`pause_reason`，按其原 `current_step` 恢复分派。
 6. 恢复时从该 spec 上次确认到的阶段继续；若需重新确认已生成但尚未确认的文档，让对应子技能用 `question` 重做确认。
+7. 紧急 spec 完成移除后、即将恢复原 `paused` spec 前，按「递延项提醒」处理 `.dwf/pending_confirmations.json` 中的 deferred 项。
 
 ### 重新开始
 
@@ -362,6 +369,7 @@ description: "DWF 开发工作流的统一调度入口。当用户想要启动�
 1. 使用 `question` 进行二次风险确认，明确告知将永久删除 `.dwf/` 目录（含 `state.json` 与全部 `specs/` 文档，包括已完成/暂停/进行中所有 spec），以及工作区根目录下的项目代码文件，不可撤销。
 2. **等待用户二次确认。** 用户选择"取消"则停止；输入取消意向则不删除。
 3. 只有用户明确选择"确认删除并重启"后，才删除 `.dwf/` 与根目录下项目代码文件，然后回到「首次初始化」。
+4. 删除时同时清除 `.dwf/pending_confirmations.json`（已包含在 `.dwf/` 内）。
 
 二次确认前不得删除任何文件。
 
@@ -453,6 +461,8 @@ description: "DWF 开发工作流的统一调度入口。当用户想要启动�
 
 会话被中断后再次触发本技能时，先执行阶段 0 自检，读取 `state.json`，按 `specs` 队列与每项的 `current_step` 分派。不要重新初始化或丢弃已有进程。
 
+若即将激活某个 spec，先按「递延项提醒」处理 `.dwf/pending_confirmations.json` 中的 deferred 项，之后再按其 `current_step` 分派。
+
 恢复逻辑：
 
 1. 读 `specs` 数组：
@@ -477,7 +487,8 @@ description: "DWF 开发工作流的统一调度入口。当用户想要启动�
    - `active`/`pending` 的 spec → 写入 `specs` 队列保持原状态；若存在多个 `active`，把第一个保留为 `active`，其余降级为 `pending`（并用 `question` 与用户确认）。
 4. 用 `question` 向用户展示重建结果：队列顺序、各 spec 状态、谁是共享上下文、谁是兄弟 spec、`_context.md` 中记录的引用时间戳。请用户确认是否正确。
 5. 用户确认后写出新的 `state.json`，重置 `created_at`/`updated_at` 为当前时间，`iteration_count` 取 `completed_specs` 长度。然后按队列恢复执行（遵循阶段 0 的 `active`/`paused`/`pending` 选择逻辑）。
-6. 若扫描发现某个兄弟 spec 的 `_context.md` 指向的初始化 spec 目录已被删除：用 `question` 告知用户该 spec 的共享上下文缺失，请用户决定是放弃该 spec、还是以当前可得的最新需求/设计稿作为新共享上下文重新指定 `shared_ref` 并重写 `_context.md`。**不要静默修复，必须让用户决定。**
+6. 若扫描发现 `.dwf/pending_confirmations.json` 仍存在且含 `status: "deferred"` 项，重建后即将激活 spec 前按「递延项提醒」处理。
+7. 若扫描发现某个兄弟 spec 的 `_context.md` 指向的初始化 spec 目录已被删除：用 `question` 告知用户该 spec 的共享上下文缺失，请用户决定是放弃该 spec、还是以当前可得的最新需求/设计稿作为新共享上下文重新指定 `shared_ref` 并重写 `_context.md`。**不要静默修复，必须让用户决定。**
 
 ## 子技能清单
 
