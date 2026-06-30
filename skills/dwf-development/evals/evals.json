@@ -3,20 +3,26 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "帮我生成技术方案",
-      "expected_output": "生成至少 2 个技术方案对比文档，保存到 04-技术方案/技术方案.md",
+      "prompt": "帮我针对饮水记录 App 这个需求做需求分析。",
+      "expected_output": "独立模式：用 question 询问用户目标 spec 目录，默认提议 .dwf/specs/{今日日期}-feat-{描述}。确认后在 {目标 spec 目录}/03-需求分析/需求分析文档.md 生成中文需求分析文档，覆盖目标端、页面与功能拆解、素材/依赖清单、范围边界。用 question 请求确认后停止。不创建 .dwf/state.json。",
       "files": []
     },
     {
       "id": 2,
-      "prompt": "需求拆解一下这个功能",
-      "expected_output": "生成功能拆解文档，保存到 03-需求拆解文档/需求拆解文档.md",
+      "prompt": "继续做技术方案，已经在工作流里了不是首次。",
+      "expected_output": "读 .dwf/state.json.specs，找 status=active 且 current_step=plans 的 spec，以 .dwf/specs/{spec.name} 为目标目录。读取 01-需求/、03-需求分析/，若 shared_ref 非空则优先读 .dwf/specs/{shared_ref}/ 下对应文档作为只读上下文。在 {目标 spec 目录}/04-技术方案/技术方案.md 生成至少 2 个并列方案与对比表，用 question 让用户选定。选定后把 selected_plan、current_step=todos、confirmed_stages 追加 plans，同步 _meta.json 与 updated_at。",
       "files": []
     },
     {
       "id": 3,
-      "prompt": "创建实现清单",
-      "expected_output": "生成有序的任务清单，保存到 05-实现清单/实现清单.md",
+      "prompt": "生成实现清单。",
+      "expected_output": "独立模式：用 question 询问目标 spec 目录（默认 .dwf/specs/{今日日期}-feat-{描述}）并由用户确认。读取 01-需求/、03-需求分析/、04-技术方案/（若有 selected_plan 以其为主）。在 {目标 spec 目录}/05-实现清单/实现清单.md 写出有序、具体、按依赖排序、带优先级与“编码规范检查”和“验证标准”的任务清单。用 question 请求确认后停止。不创建 .dwf/state.json。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "这次需求挺大的，03-需求分析 刚确认完，接下来怎么办？",
+      "expected_output": "工作流模式：active spec 的 current_step 应已推进到 plans、把 breakdown 追加到 confirmed_stages。若该 spec 是 is_shared_context=true（初始化 spec），本技能在确认后提醒 dwf-orchestrator：该 spec 需求覆盖多个页面/复杂模块，建议由 orchestrator 用 question 询问用户是否拆分迭代。本技能不直接拆分，由 orchestrator 拆分。",
       "files": []
     }
   ]
