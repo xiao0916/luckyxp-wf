@@ -1,0 +1,123 @@
+---
+name: dwf-coding
+description: "当用户需要单独执行 DWF 工作流的编码阶段时必须使用本技能。它从已确认的技术方案、实现清单和可选 `.dwf/state.json` 中恢复上下文，在目标代码目录（工作流模式下为工作区根目录）按任务逐项编码、验证，并更新目标 spec 目录下 `05-实现清单/实现清单.md`。适用于“开始编码”“执行实现清单”“继续编码阶段”“根据实现清单写代码”“恢复编码”“实施本次迭代变更”等场景。可独立运行，也可作为 dwf-orchestrator 编排的工作流的一部分（state.json 中存在 `status: active` 且 `current_step: code` 的 spec 时进入工作流模式）。"
+---
+
+# dwf-coding
+
+本技能用于单独执行 `dev-workflow` 的「编码执行」阶段。它只负责把已确认的方案和实现清单落到代码中，不负责生成需求文档、设计稿、需求拆解、技术方案或实现清单。
+
+<HARD-GATE>
+以下规则不可违反：
+
+1. **只处理编码执行。**
+   默认只读取或更新目标代码目录、目标 spec 目录下 `05-实现清单/实现清单.md`、必要的项目代码文件，以及工作流模式下的 `.dwf/state.json`。不要主动创建或重写 `01-需求/`、`02-设计稿/`、`03-需求分析/`、`04-技术方案/` 或 `05-实现清单/` 的主体内容，除非用户明确要求先回到对应阶段。
+
+2. **目标代码目录与目标 spec 目录由运行模式决定。**
+   - 工作流模式：读取 `.dwf/state.json`，在 `specs` 数组中找 `status: "active"` 且 `current_step` 为 `code` 的 spec。目标 spec 目录为 `.dwf/specs/{spec.name}/`，目标代码目录为**工作区根目录**（dwf-orchestrator 的约定：代码不放 spec 目录内、统一放根目录）。若 `shared_ref` 非空，可读取 `.dwf/specs/{shared_ref}/01-需求/`、`/02-设计稿/` 作为只读上下文。
+   - 独立模式：用 `question` 询问用户目标 spec 目录（含实现清单与技术方案）与目标代码目录，spec 目录默认提议 `.dwf/specs/{今日日期}-feat-{描述}`，代码目录默认提议工作区当前目录，由用户确认或修改。
+
+3. **编码前必须读取依据。**
+   执行任何代码修改前，必须先读取目标 spec 目录下 `05-实现清单/实现清单.md`、`04-技术方案/技术方案.md`（如果存在）、`skills/dev-workflow/references/coding_standards.md`（如果位于本仓库），并检查目标代码目录的现有结构。若缺少实现清单或技术方案不足以执行，先说明缺口并请求用户补充或回到 `dwf-development`。
+
+4. **检测运行模式。**
+   每次触发后都要检查 `.dwf/state.json`，找到 `status: "active"` 且 `current_step` 为 `code` 的 spec。
+   - 找到则按工作流模式执行编码，完成后把该 spec 从 `specs` 队列移除、追加到 `completed_specs`、递增 `iteration_count`（由 dwf-orchestrator 收尾；本技能也可代为更新 state.json 与 `_meta.json`）。
+   - 未找到满足条件的 active spec 时按独立模式执行，不创建 `.dwf/state.json`，不推进完整工作流状态。
+
+5. **不绕过确认边界。**
+   如果实现清单仍未确认、spec 的 `current_step` 不是 `code`、或发现需求/方案/清单互相冲突，必须暂停并说明原因，不要擅自编码。
+
+6. **逐项执行与逐项标记。**
+   严格按实现清单顺序执行任务。每完成一项，依据该任务的“编码规范检查”和“验证标准”核对结果，再把对应任务从 `[ ]` 标记为 `[x]`（写入目标 spec 目录下 `05-实现清单/实现清单.md`）。不要一次性把未验证的任务全部标记完成。
+
+7. **变更范围受控。**
+   只修改完成当前任务所必需的文件。工作流模式下，只实施本次确认的受影响范围；不要顺手重构无关模块、替换架构或扩大需求。
+
+8. **全程使用中文。**
+   除非用户明确要求使用其他语言，所有与用户的交互、技能说明、生成的文档、测试记录、审计结论和产物说明都必须使用中文。代码、文件路径、命令、API 名、技术术语、第三方库名和用户提供的原文内容可以保留英文。
+</HARD-GATE>
+
+## 触发后流程
+
+### 1. 探查上下文
+
+- 检查 `.dwf/state.json` 是否存在，读取 `specs` 数组与每项的 `current_step`/`selected_plan`/`shared_ref`/`updated_at`。
+- 找到 `status: "active"` 且 `current_step: "code"` 的 spec 后，目标 spec 目录为 `.dwf/specs/{spec.name}/`，目标代码目录默认为工作区根目录。若 `shared_ref` 非空，可读取其 `01-需求/`、`02-设计稿/` 作为只读上下文。
+- 读取目标 spec 目录下 `05-实现清单/实现清单.md`，识别未完成任务、任务顺序、验证标准和阻塞项。
+- 读取目标 spec 目录下 `04-技术方案/技术方案.md`；如果 `selected_plan` 有值，以选定方案为主。
+- 读取 `skills/dev-workflow/references/coding_standards.md`；如果当前仓库没有该文件，则遵循现有项目规范和用户提供的编码约束。
+- 检查目标代码目录是否已有项目代码，并分析框架、目录结构、命名、样式、测试和构建方式。
+
+### 2. 判断运行模式
+
+**独立模式**
+
+满足任一条件即为独立模式：
+
+- `.dwf/state.json` 不存在。
+- `.dwf/state.json` 存在，但 `specs` 中不存在 `status: "active"` 且 `current_step: "code"` 的 spec。
+- 用户明确要求“只执行编码，不推进工作流状态”。
+
+独立模式下：
+
+- 用 `question` 询问用户目标 spec 目录（含实现清单与技术方案）与目标代码目录，给出默认提议（spec 目录默认 `.dwf/specs/{今日日期}-feat-{描述}`、代码目录默认工作区当前目录），由用户确认或修改。
+- 只在目标代码目录和目标 spec 目录下的实现清单中执行编码与任务标记。
+- 不创建 `.dwf/state.json`。
+- 完成后总结改动、验证结果和剩余任务。
+
+**工作流模式**
+
+满足以下条件时进入工作流模式：
+
+- `.dwf/state.json` 存在，`specs` 中存在 `status: "active"` 且 `current_step: "code"` 的 spec，且 `confirmed_stages` 含所有受影响文档阶段。
+
+工作流模式下：
+
+- 按 dwf-orchestrator 的 code 阶段执行。目标代码目录为工作区根目录。
+- 每完成任务都更新目标 spec 目录下 `05-实现清单/实现清单.md` 的任务勾选。
+- 所有任务完成后更新 `.dwf/state.json`：把该 spec 从 `specs` 移除、追加到 `completed_specs`（含 `completed_at`），递增 `iteration_count`，更新 `updated_at`；同步该 spec 的 `_meta.json` 为 `status: "done"`、`completed_at`。然后由 dwf-orchestrator 用 `question` 询问下一个 spec 是否继续。
+
+### 3. 执行编码
+
+1. 从实现清单中选择第一个未完成且未阻塞的任务。
+2. 读取任务涉及的文件（位于目标代码目录）；如果文件不存在，先确认它是否应按技术方案创建。
+3. 按项目现有模式实施最小必要改动。
+4. 对照任务中的编码规范检查和验证标准进行自检。
+5. 运行相关验证命令，例如 lint、typecheck、test、build；若无法运行，说明原因并记录替代检查。
+6. 将已验证完成的任务标记为 `[x]`（写入目标 spec 目录下 `05-实现清单/实现清单.md`）。
+7. 继续下一个任务，直到清单完成或遇到阻塞。
+
+### 4. 处理模板和新项目
+
+如果目标代码目录为空，并且技术方案明确选择基于 `dev-workflow` 的 React 模板：
+
+- PC 端优先使用 `skills/dev-workflow/assets/react-pc/`。
+- 移动端优先使用 `skills/dev-workflow/assets/react-mobile/`。
+- 通用配置、hooks、utils、请求封装等可参考或合并 `skills/dev-workflow/assets/shared/`。
+- 只复制与目标端和选定方案匹配的内容，不复制无关端模板，不把 `dist/` 当作源代码继续开发。
+
+如果模板、技术方案和需求存在冲突，暂停并向用户说明冲突点。
+
+### 5. 阻塞处理
+
+出现以下情况时必须暂停：
+
+- 缺少目标 spec 目录下 `05-实现清单/实现清单.md`。
+- 实现清单没有明确任务、验证标准或依赖顺序。
+- 技术方案缺失且无法判断架构或选型。
+- spec 的 `current_step` 显示仍处于 `requirements`、`design`、`breakdown`、`plans` 或 `todos`。
+- 编码过程中发现需求、方案或实现清单已经失效。
+
+暂停时说明：缺少什么、为什么不能继续、建议用户进入哪个技能或阶段补齐。
+
+## 完成前检查
+
+结束前确认：
+
+- 已读取实现清单、技术方案、编码规范和现有代码结构。
+- 已按任务顺序执行，且只标记已验证完成的任务（勾选写入目标 spec 目录下实现清单）。
+- 已运行可用的验证命令，或说明无法运行的原因。
+- 独立模式下没有创建或推进 `.dwf/state.json`。
+- 工作流模式下只在任务全部完成后更新 state.json（spec 移入 completed_specs、递增 iteration_count）与该 spec 的 `_meta.json`（status=done）。
+- 总结中列出完成任务、主要修改文件、验证结果、未完成事项或阻塞点。

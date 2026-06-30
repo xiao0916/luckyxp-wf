@@ -1,0 +1,29 @@
+{
+  "skill_name": "dwf-coding",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我根据实现清单开始编码。",
+      "expected_output": "独立模式（无 .dwf/state.json 或无 active+code 的 spec）：用 question 询问目标 spec 目录（默认 .dwf/specs/{今日日期}-feat-{描述}）和目标代码目录（默认工作区当前目录）。读取该 spec 下 05-实现清单/、04-技术方案/、skills/dev-workflow/references/coding_standards.md（若存在否则遵循现有项目规范）。按任务顺序逐项实现，对照“编码规范检查”和“验证标准”自检并运行可用 lint/typecheck/test。每完成一项把 [ ] 改为 [x] 写入目标 spec 目录的实现清单。不创建 .dwf/state.json。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": ".dwf/state.json 里有个 active 且 current_step=code 的 spec，继续编码阶段。",
+      "expected_output": "工作流模式：读 state.json 找 active+code 的 spec。目标 spec 目录为 .dwf/specs/{spec.name}，目标代码目录为工作区根目录。按实现清单顺序执行任务，每完成一项更新目标 spec 下实现清单勾选。所有任务完成后把该 spec 从 specs 移入 completed_specs（含 completed_at）、递增 iteration_count、同步该 spec 的 _meta.json 为 status=done，更新 updated_at。不绕过确认。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "当前 active spec 的 current_step 是 plans，但我想直接写代码跳过方案和清单。",
+      "expected_output": "拒绝绕过阶段。说明当前还在 plans 阶段，需先回 dwf-development 完成技术方案选择和实现清单确认，把 current_step 推到 code 后再来编码。不修改任何代码、不擅自推进 state.json。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "实现清单里第 3 个任务依赖的接口还没准备好，但我先把别的做完。",
+      "expected_output": "按实现清单顺序逐项执行，遇到阻塞项（任务 3）暂停并说明缺什么、为什么不能继续。可选择跳过该任务继续后续不依赖它的任务（若实现清单允许），不把未验证的任务标记为 [x]。完成后总结已完成、阻塞、剩余任务。",
+      "files": []
+    }
+  ]
+}
