@@ -365,6 +365,90 @@ description: "DWF 开发工作流的统一调度入口。当用户想要启动�
 
 二次确认前不得删除任何文件。
 
+### 待确认事项逐项确认循环
+
+在阶段推进前，若该 spec 刚生成的阶段文档含非空"待确认项/待解决问题"段，按本循环处理；段为空或不存在则现有行为不变。
+
+流程：
+
+1. 读目标 spec 目录下刚确认的阶段文档，按「待确认事项台账」的解析规则提取段与条目。
+2. 段不存在或无 `^-\s+` 列表项 → 跳过本循环，直接推进 `current_step`。
+3. 解析失败（段存在但内容不合规）→ 用 `question` 一次性告知"检出待确认段但无法解析条目，是否仍推进？"，选项"跳过解析推进"/"需要修改文档重整该段"。选后者等同回到 sub-skill 修改文档重审阅。
+4. 对每个非空列表项，逐项发起 `question`（custom: true）：
+
+```json
+{
+  "questions": [
+    {
+      "question": "待确认事项（来自 {spec 目录名}/{阶段} 的「{段名}」）：\n\n{content}\n\n请逐一项处理。本项你打算如何处置？",
+      "header": "待确认事项 {当前序号}/{总数}",
+      "options": [
+        {"label": "已解决，给出答案", "description": "在自定义输入中写出对该事项的决定/答案，记录到台账"},
+        {"label": "跳过，留待后续迭代", "description": "标为递延，台账保留 status=deferred，下次 spec 激活前再提醒"},
+        {"label": "已在文档中直接修改", "description": "本事项已在阶段文档里直接改掉，从待确认段移除并记入台账为 answered"}
+      ]
+    }
+  ]
+}
+```
+
+5. 分支处理：
+   - **已解决**：用户在 custom 输入答案 → 台账写 `status: "answered"`、`user_answer: <答案>`、`answered_at: <当前时间>`、`resolved_by_spec: <当前 active spec 目录名>`。
+   - **跳过**：台账写 `status: "deferred"`、`user_answer: null`。`raised_at` 在首次登记时置当前时间，已存在的 deferred 项不重置。
+   - **已在文档中直接修改**：orchestrator 不再解析该行占位文本，台账写 `status: "answered"`、`user_answer: "已在文档中修改"`、`answered_at: <当前时间>`、`resolved_by_spec: <当前 active spec 目录名>`。
+6. 所有项处理完后，更新台账顶层 `updated_at`，再推进 `current_step`。
+
+登记规则：
+
+- 段内每个非空 `^-\s+` 列表项对应一条台账 item。
+- `id` 由 orchestrator 按 `{当日日期}-{3位序号}` 顺序分配；同日已有序号从其后续接。
+- 同一阶段同一段在多次"需要修改→确认"循环中，若用户重排或重写条目，按解析顺序重新登记；旧 deferred 项不自动失效（见设计文档范围边界），仅在新一轮登记时若 content + source_spec + source_stage 完全相同则视为同一项不新增。
+
+### 递延项提醒
+
+在任意 spec 即将转 `active` 前，orchestrator 插入一次"台账扫检 + 提醒"步骤。
+
+触发点（覆盖以下场景）：
+
+- 首次激活首个 pending（首次初始化后、上一个 spec 完成后）
+- `paused` 恢复为 `active`（紧急 spec 完成后即将恢复原 paused spec 前）
+- 拆分兄弟入队后首个变 `active`
+- 新增迭代直接激活
+- `state.json` 缺失重建后即将激活
+
+流程：
+
+1. 读 `.dwf/pending_confirmations.json`；筛 `status: "deferred"` 项。
+2. 无 deferred 项 → 直接置 active 并分派（现有行为不变）。
+3. 有 deferred 项 → 发起 `question`（custom: true）：
+
+```json
+{
+  "questions": [
+    {
+      "question": "在开始 spec「{X}」前，有 {N} 项此前递延的待确认事项。是否现在处理？\n\n{列出每项：序号. content（来自 spec/stage）}",
+      "header": "递延待确认事项提醒",
+      "options": [
+        {"label": "逐项处理", "description": "进入逐项 question 循环，对每项给答案/跳过/已改文档"},
+        {"label": "全部继续递延，直接开始本 spec", "description": "不处理，立即激活 spec X；这些项保留 deferred，下次再有 spec 转 active 仍有提醒"},
+        {"label": "只处理来自本 spec 的项", "description": "只处理 source_spec==X 的 deferred 项，其它项继续递延"}
+      ]
+    }
+  ]
+}
+```
+
+4. 分支处理：
+   - **逐项处理**：进入与上述「待确认事项逐项确认循环」相同的循环，但枚举全集为筛选出的 deferred 项。解决项写 `status: "answered"`、`user_answer`、`answered_at`、`resolved_by_spec: <本次即将 active 的 spec X 目录名>`。
+   - **全部继续递延**：不动台账，立即激活 spec X。
+   - **只处理来自本 spec 的项**：仅枚举 `source_spec == X` 的 deferred 项进入逐项循环；其它项保留 deferred。
+5. 处理完后同步台账 `updated_at`，再置 active 并分派。
+
+约定：
+
+- 同一 deferred 项跨多次提醒不新增 item；只在最终用户给答案时更新 `answered_at` 与 `resolved_by_spec`。
+- 不设"忽略不再提醒"开关；坚持每次激活前都问。
+
 ## 恢复
 
 会话被中断后再次触发本技能时，先执行阶段 0 自检，读取 `state.json`，按 `specs` 队列与每项的 `current_step` 分派。不要重新初始化或丢弃已有进程。
