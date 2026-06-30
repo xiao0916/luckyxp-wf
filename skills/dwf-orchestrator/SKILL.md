@@ -180,6 +180,29 @@ description: "DWF 开发工作流的统一调度入口。当用户想要启动�
 
 `_context.md` 既给出原 spec 目录名，也显式列出依赖文件的相对路径与快照时间戳。即使原 spec 目录将来被改/删，兄弟 spec 仍能通过 `_context.md` 推断曾依赖哪些文档，并据此决定如何重生成或修复。
 
+### 待确认事项台账 `.dwf/pending_confirmations.json`
+
+仅 orchestrator 读写。完整结构与字段语义见 `docs/plans/2026-06-30-pending-confirmations-design.md` 第 1 节。
+
+字段汇总：
+
+- `items[]`：每项含
+  - `id`：`{YYYY-MM-DD}-{3位序号}`，orchestrator 首次登记时分配
+  - `source_spec`/`source_stage`/`source_section`：来源 spec 目录名/阶段/段名
+  - `content`：从文档段提取的待确认事项文本
+  - `status`：`deferred`（递延未决）/ `answered`（已解答）
+  - `user_answer`：用户给的答案；跳过项为 null
+  - `raised_at`/`answered_at`：登记/解答时间戳
+  - `resolved_by_spec`：仅 answered 项有，记录由哪个 spec 触发的提醒解决
+- `updated_at`/`created_at`：顶层时间戳
+
+解析规则：
+
+- 段名匹配 `^##\s*(待确认项|待解决问题)\s*$`（兼容现有两种段名）
+- 条目匹配 `^-\s+`（无序列表项）
+- 占位行（如 `- [需要与设计确认的问题]`）仍登记，因为它本身就是待用户决定的内容
+- 段为空或文档中不存在该段 → 不触发任何额外 question
+
 ## 目录结构
 
 编排层不创建阶段文档正文，首次初始化时仅为首个 spec 创建目录骨架。项目代码位于工作区根目录，不在 spec 目录内。每个 spec 目录下写 `_meta.json` 记录状态：
