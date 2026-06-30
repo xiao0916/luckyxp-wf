@@ -22,8 +22,8 @@
 - `{目标 spec 目录}/04-技术方案/技术方案.md`（推荐，有 `selected_plan` 则以其为主）
 - 目标代码目录中现有代码或可初始化的新项目
 - `.dwf/state.json`（工作流模式需要）
-- 编码规范：本仓库存在 `skills/dev-workflow/references/coding_standards.md` 时以它为准；否则遵循现有项目规范和用户约束
-- React 模板（可选）：若新项目且方案基于 React，可参考 `skills/dev-workflow/assets/react-pc|react-mobile|shared/`
+- 编码规范：本技能目录下 `references/coding_standards.md`
+- React 模板（可选）：若新项目且方案基于 React，可参考本技能目录下 `assets/react-pc|react-mobile|shared/`
 
 ## 输出
 

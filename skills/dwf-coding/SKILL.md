@@ -5,7 +5,7 @@ description: "当用户需要单独执行 DWF 工作流的编码阶段时必须�
 
 # dwf-coding
 
-本技能用于单独执行 `dev-workflow` 的「编码执行」阶段。它只负责把已确认的方案和实现清单落到代码中，不负责生成需求文档、设计稿、需求拆解、技术方案或实现清单。
+本技能用于单独执行 DWF 工作流的「编码执行」阶段。它只负责把已确认的方案和实现清单落到目标代码目录，不负责生成需求文档、设计稿、需求分析、技术方案或实现清单。
 
 <HARD-GATE>
 以下规则不可违反：
@@ -18,7 +18,7 @@ description: "当用户需要单独执行 DWF 工作流的编码阶段时必须�
    - 独立模式：用 `question` 询问用户目标 spec 目录（含实现清单与技术方案）与目标代码目录，spec 目录默认提议 `.dwf/specs/{今日日期}-feat-{描述}`，代码目录默认提议工作区当前目录，由用户确认或修改。
 
 3. **编码前必须读取依据。**
-   执行任何代码修改前，必须先读取目标 spec 目录下 `05-实现清单/实现清单.md`、`04-技术方案/技术方案.md`（如果存在）、`skills/dev-workflow/references/coding_standards.md`（如果位于本仓库），并检查目标代码目录的现有结构。若缺少实现清单或技术方案不足以执行，先说明缺口并请求用户补充或回到 `dwf-development`。
+   执行任何代码修改前，必须先读取目标 spec 目录下 `05-实现清单/实现清单.md`、`04-技术方案/技术方案.md`（如果存在）、本技能目录下 `references/coding_standards.md`，并检查目标代码目录的现有结构。若缺少实现清单或技术方案不足以执行，先说明缺口并请求用户补充或回到 `dwf-development`。
 
 4. **检测运行模式。**
    每次触发后都要检查 `.dwf/state.json`，找到 `status: "active"` 且 `current_step` 为 `code` 的 spec。
@@ -46,7 +46,7 @@ description: "当用户需要单独执行 DWF 工作流的编码阶段时必须�
 - 找到 `status: "active"` 且 `current_step: "code"` 的 spec 后，目标 spec 目录为 `.dwf/specs/{spec.name}/`，目标代码目录默认为工作区根目录。若 `shared_ref` 非空，可读取其 `01-需求/`、`02-设计稿/` 作为只读上下文。
 - 读取目标 spec 目录下 `05-实现清单/实现清单.md`，识别未完成任务、任务顺序、验证标准和阻塞项。
 - 读取目标 spec 目录下 `04-技术方案/技术方案.md`；如果 `selected_plan` 有值，以选定方案为主。
-- 读取 `skills/dev-workflow/references/coding_standards.md`；如果当前仓库没有该文件，则遵循现有项目规范和用户提供的编码约束。
+- 读取本技能目录下 `references/coding_standards.md`；若该文件缺失，则遵循现有项目规范和用户提供的编码约束。
 - 检查目标代码目录是否已有项目代码，并分析框架、目录结构、命名、样式、测试和构建方式。
 
 ### 2. 判断运行模式
@@ -90,11 +90,11 @@ description: "当用户需要单独执行 DWF 工作流的编码阶段时必须�
 
 ### 4. 处理模板和新项目
 
-如果目标代码目录为空，并且技术方案明确选择基于 `dev-workflow` 的 React 模板：
+如果目标代码目录为空，并且技术方案明确选择基于本技能 `assets/` 中的 React 模板：
 
-- PC 端优先使用 `skills/dev-workflow/assets/react-pc/`。
-- 移动端优先使用 `skills/dev-workflow/assets/react-mobile/`。
-- 通用配置、hooks、utils、请求封装等可参考或合并 `skills/dev-workflow/assets/shared/`。
+- PC 端优先使用本技能目录下 `assets/react-pc/`。
+- 移动端优先使用本技能目录下 `assets/react-mobile/`。
+- 通用配置、hooks、utils、请求封装等可参考或合并本技能目录下 `assets/shared/`。
 - 只复制与目标端和选定方案匹配的内容，不复制无关端模板，不把 `dist/` 当作源代码继续开发。
 
 如果模板、技术方案和需求存在冲突，暂停并向用户说明冲突点。

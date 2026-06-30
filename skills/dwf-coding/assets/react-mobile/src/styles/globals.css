@@ -1,0 +1,29 @@
+@import 'tailwindcss';
+
+@layer base {
+  body {
+    background-color: #f9fafb;
+    color: #111827;
+    font-family: system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    overscroll-behavior: none;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    --tab-bar-height: 3.5rem;
+    --nav-bar-height: 3rem;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  a,
+  button,
+  [role='button'] {
+    min-height: 44px; /* px-to-rem-ignore */
+    min-width: 44px; /* px-to-rem-ignore */
+  }
+}
