@@ -29,7 +29,7 @@
 1. 读取需求文档（目标 spec 下 `01-需求/` 或 `shared_ref` 指向的初始化 spec 的 `01-需求/`）。
 2. 判断设计稿来源：链接、图片、AI 生成或跳过。
 3. 信息不足时一次只问一个澄清问题。
-4. 读取设计稿模板：本仓库存在 `skills/dev-workflow/references/design_template.md` 时以它为准；否则遵循目标 spec 需求文档自行组织。
+4. 读取本技能目录下 `references/design_template.md` 作为模板。
 5. 在目标 spec 目录下 `02-设计稿/设计稿.md` 生成或更新文档。
 6. 用 `question` 请求确认；如已存在旧文档先读取并让用户选择保留/修改/替换。
 7. 确认后停止；工作流模式下才更新该 spec 的 `current_step` 为 `breakdown`。

@@ -5,7 +5,7 @@ description: "当用户需要单独执行 DWF 工作流的设计稿阶段时必�
 
 # dwf-design
 
-本技能用于单独执行 `dev-workflow` 的“设计稿”步骤。它只负责收集、生成或记录设计稿信息，并产出 `02-设计稿/设计稿.md`；独立运行时不启动完整开发工作流，工作流模式下按 `.dwf/state.json` 继续当前阶段。
+本技能用于单独执行 DWF 工作流的“设计稿”阶段。它只负责收集、生成或记录设计稿信息，产出目标 spec 目录下 `02-设计稿/设计稿.md`；独立运行时不启动完整开发工作流，工作流模式下按 `.dwf/state.json` 继续当前阶段。
 
 <HARD-GATE>
 以下规则不可违反：
@@ -80,7 +80,7 @@ description: "当用户需要单独执行 DWF 工作流的设计稿阶段时必�
 
 ### 5. 生成设计稿文档
 
-读取设计稿模板：本仓库存在 `skills/dev-workflow/references/design_template.md` 时以它为准；否则按目标 spec 的需求文档自行组织设计说明结构。保存到目标 spec 目录下：
+读取本技能目录下 `references/design_template.md` 作为模板保存到目标 spec 目录下：
 
 ```text
 {目标 spec 目录}/02-设计稿/设计稿.md
@@ -131,7 +131,7 @@ description: "当用户需要单独执行 DWF 工作流的设计稿阶段时必�
 - 独立模式下没有推进后续阶段。
 - 工作流模式下只在用户确认后更新该 spec 的 `current_step` 为 `breakdown`。
 - 文档内容为中文。
-- 文档遵循 `skills/dev-workflow/references/design_template.md`（若该文件存在）；否则按需求文档自行组织设计说明结构。
+- 文档遵循本技能目录下 `references/design_template.md`。
 - 已说明保存路径和下一步需要用户确认的事项。
 
 
