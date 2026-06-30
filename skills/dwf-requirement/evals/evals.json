@@ -1,0 +1,29 @@
+﻿{
+  "skill_name": "dwf-requirement",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我想把一个想法整理成需求文档：做一个团队 OKR 看板，希望按周期查看目标、关键结果、负责人和进度。",
+      "expected_output": "独立模式：用 question 询问用户目标 spec 目录，默认提议 .dwf/specs/{今日日期}-feat-{描述}，由用户确认。信息不足则一次一个问题追问（项目名、背景、用户、范围、约束、验收）。在 {目标 spec 目录}/01-需求/需求文档.md 按 references/requirements_template.md 生成中文需求文档，含 frontmatter、业务流程 Mermaid、FR/NFR 编号、MoSCoW 优先级、验收标准。用 question 请求确认后停止。不创建 .dwf/state.json，不推进到 design/breakdown 等阶段。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "先别急着写文档，我只有一句话：做一个客户投诉跟踪系统。",
+      "expected_output": "识别信息不足，按一次一个问题的原则追问（目标/用户/端/范围等），不直接生成文档。可用合理假设写入待解决问题，但不预设大量内容。最终确认后仍需经 question 确认目录与文档。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "读取旧的需求文档再覆盖一下，移动端也要支持。",
+      "expected_output": "检测目标 spec 目录下 01-需求/需求文档.md 已存在，先读取并总结，用 question 让用户选择保留/修改/替换。用户确认前不覆盖。修改时保留原结构、更新 date、按需递增 version 并追 revision，不创建 需求文档-v2.md。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "当前项目已有 .dwf/state.json，specs 里有一个 active 且 current_step=requirements 的 spec，请继续做需求阶段。",
+      "expected_output": "工作流模式：读 .dwf/state.json 找到 active spec，以 .dwf/specs/{spec.name} 为目标目录。在其 01-需求/ 下生成需求文档。用 question 请求确认。用户确认后把该 spec 的 current_step 更新为 design、把 requirements 追加到 confirmed_stages，同步 _meta.json 与 updated_at。不创建除初始 spec 之外的工作流目录。",
+      "files": []
+    }
+  ]
+}
