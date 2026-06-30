@@ -1,0 +1,29 @@
+﻿{
+  "skill_name": "dwf-design",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "已有需求文档，帮我生成设计稿。",
+      "expected_output": "独立模式：用 question 询问用户目标 spec 目录、设计稿来源（链接/图片/AI 生成/跳过）。默认目录提议 .dwf/specs/{今日日期}-feat-{描述}。若需求文档不存在于目标 spec 目录，按 shared_ref 或询问用户找依据。按 design_template 生成 {目标 spec 目录}/02-设计稿/设计稿.md，含项目名称、来源、设计说明、主色调、字体、间距、关键页面、交互、响应式、待确认项。不伪造图片路径。用 question 请求确认后停止，不创建 .dwf/state.json。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "我有个 Figma 链接：https://figma.com/file/example/team-dashboard，帮我把它记录成设计稿。",
+      "expected_output": "识别为链接来源。把链接写入设计稿来源；能读取截图则保存到目标 spec 目录下 02-设计稿/images/，不能读取则明确告知并标注图片缺失为待确认项，不伪造图片路径。仅在目标 spec 目录 02-设计稿/ 与必要 images/ 下写文件，不创建其它阶段目录。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "覆盖一下旧的设计稿就行，别客气。",
+      "expected_output": "检测目标 spec 目录下 02-设计稿/设计稿.md 已存在，先读取并总结，用 question 让用户选择保留/修改/替换。用户确认前不覆盖。不创建 设计稿-v2.md 之类新版本文件除非用户明确要求。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": ".dwf/state.json 里有个 active 且 current_step=design 的 spec，继续设计稿阶段。",
+      "expected_output": "工作流模式：读 state.json 找 active spec，目标目录为 .dwf/specs/{spec.name}。若 shared_ref 非空，优先读取 .dwf/specs/{shared_ref}/01-需求/ 作为只读上下文。在该 spec 目录下 02-设计稿/ 生成设计稿。用户确认后将该 spec 的 current_step 更新为 breakdown、confirmed_stages 追加 design，同步 _meta.json 与 updated_at。若 design_skipped=true，直接写跳过说明文档并推进。",
+      "files": []
+    }
+  ]
+}
