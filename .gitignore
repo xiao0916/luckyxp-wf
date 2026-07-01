@@ -29,6 +29,7 @@ build/
 .cache/
 
 # Agent adapter directories
+.agents/
 .codex/
 .opencode/
 .cursor/
@@ -36,5 +37,8 @@ build/
 
 # Skill generated outputs
 outputs/
+
+# Skill test results
+test-results/
 
 .venv/
