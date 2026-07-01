@@ -1,0 +1,82 @@
+{
+    "skill_name":  "toolchain-issue-recovery",
+    "evals":  [
+                  {
+                      "id":  1,
+                      "prompt":  "PowerShell 读取一个中文 Markdown 文件时显示成 `椤圭洰鍚嶇О`，帮我判断是不是文件坏了。",
+                      "expected_output":  "agent 应识别为可能的编码误读，先建议用 `Get-Content -Raw -Encoding UTF8` 验证，不应直接判定文件损坏；如 UTF-8 读取正常，应记录为默认编码导致的显示乱码。",
+                      "files":  [
+
+                                ],
+                      "expectations":  [
+                                           "识别 mojibake 可能是编码问题",
+                                           "建议显式使用 `-Encoding UTF8` 读取",
+                                           "不直接判定文件损坏",
+                                           "说明必要时设置控制台输出编码",
+                                           "使用中文解释"
+                                       ]
+                  },
+                  {
+                      "id":  2,
+                      "prompt":  "`apply_patch` 在 Windows 沙箱里报 `helper_unknown_error: setup refresh had errors`，但我还要继续写入工作区文件。",
+                      "expected_output":  "agent 应先缩小补丁并确认目标路径在工作区内；若仍失败，可使用同一 shell 的原生命令在允许范围内写入，并记录偏离原因、替代动作和后续验证，不应绕过权限或隐瞒 apply_patch 失败。",
+                      "files":  [
+
+                                ],
+                      "expectations":  [
+                                           "先建议缩小补丁范围",
+                                           "确认写入目标位于工作区允许范围",
+                                           "允许在记录原因后使用 PowerShell 原生命令替代",
+                                           "要求后续验证内容、编码和范围",
+                                           "不隐瞒 `apply_patch` 失败"
+                                       ]
+                  },
+                  {
+                      "id":  3,
+                      "prompt":  "`quick_validate.py` 因为 `ModuleNotFoundError: No module named \u0027yaml\u0027` 没跑通，我能说技能校验通过了吗？",
+                      "expected_output":  "agent 应明确不能声称官方校验通过；可以说明原校验因缺依赖失败，并执行替代验证，例如检查 frontmatter、JSON 可解析、关键约束、模板残留和目录范围。",
+                      "files":  [
+
+                                ],
+                      "expectations":  [
+                                           "明确不能声称官方校验通过",
+                                           "记录缺少 `yaml` 依赖",
+                                           "提出安装依赖需遵守权限或网络审批",
+                                           "给出替代验证清单",
+                                           "要求最终区分原校验失败和替代验证结果"
+                                       ]
+                  },
+                  {
+                      "id":  4,
+                      "prompt":  "刚遇到一个工具链问题，技能里没有对应方案。我已经解决了，要不要记录？",
+                      "expected_output":  "agent 应判断是否具有复用价值；如果是高复现、可泛化、能避免未来误判或不安全操作的问题，应把通用规则写回 `toolchain-issue-recovery` 的 SKILL.md、USAGE.md 或 evals，不应写入一次性项目细节。",
+                      "files":  [
+
+                                ],
+                      "expectations":  [
+                                           "判断问题是否可复用",
+                                           "要求解决后沉淀通用经验",
+                                           "说明不同内容写入 SKILL.md、USAGE.md 或 evals",
+                                           "避免记录一次性项目细节",
+                                           "默认中文记录"
+                                       ]
+                  },
+                  {
+                      "id":  5,
+                      "prompt":  "`quick_validate.py` 已经安装了 PyYAML，但在 Windows 上读取中文 `SKILL.md` 时报 `UnicodeDecodeError: \u0027gbk\u0027 codec can\u0027t decode byte ...`，应该怎么恢复？",
+                      "expected_output":  "agent 应识别为 Windows Python 默认编码导致的工具链问题，不应判定文件损坏或声称校验通过；应先用 UTF-8 读取确认文件内容，再通过设置 `PYTHONUTF8=1` 重新运行脚本；如遇到 BOM 导致的 frontmatter 识别问题，可转换为 UTF-8 no BOM，并记录这是工具适配。不要建议修改 `quick_validate.py` 源脚本。",
+                      "files":  [
+                                    "skills/\u003c技能名\u003e/SKILL.md"
+                                ],
+                      "expectations":  [
+                                           "识别 `UnicodeDecodeError: gbk` 是 Python 默认编码问题",
+                                           "建议先用 `Get-Content -Raw -Encoding UTF8` 验证文件内容",
+                                           "建议设置 `$env:PYTHONUTF8=\u00271\u0027` 后重跑校验脚本",
+                                           "说明 UTF-8 BOM 可能导致严格 frontmatter 校验失败",
+                                           "必要时使用 UTF-8 no BOM 重写目标文件并记录原因",
+                                           "不建议修改校验脚本源文件",
+                                           "不声称原校验已通过，除非重跑成功"
+                                       ]
+                  }
+              ]
+}

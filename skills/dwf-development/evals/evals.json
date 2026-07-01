@@ -24,6 +24,18 @@
       "prompt": "这次需求挺大的，03-需求分析 刚确认完，接下来怎么办？",
       "expected_output": "工作流模式：active spec 的 current_step 应已推进到 plans、把 breakdown 追加到 confirmed_stages。若该 spec 是 is_shared_context=true（初始化 spec），本技能在确认后提醒 dwf-orchestrator：该 spec 需求覆盖多个页面/复杂模块，建议由 orchestrator 用 question 询问用户是否拆分迭代。本技能不直接拆分，由 orchestrator 拆分。",
       "files": []
+    },
+    {
+      "id": 5,
+      "prompt": ".dwf/state.json 里有 active spec 且 current_step=breakdown，请继续需求分析阶段。",
+      "expected_output": "工作流模式只处理 breakdown：读取 state.json 找 active+breakdown 的 spec，只生成或更新 .dwf/specs/{spec.name}/03-需求分析/需求分析文档.md，用 question 请求确认。确认后只把 current_step 推进到 plans、confirmed_stages 追加 breakdown，并停止；不得在同一次调用中生成 04-技术方案/技术方案.md、05-实现清单/实现清单.md，也不得自动进入 plans。",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": ".dwf/state.json 里有 active spec 且 current_step=plans，请继续技术方案阶段。",
+      "expected_output": "工作流模式只处理 plans：读取 state.json 找 active+plans 的 spec，只生成或更新 .dwf/specs/{spec.name}/04-技术方案/技术方案.md，提供至少两个方案并用 question 请求用户选择。选择后只记录 selected_plan、把 current_step 推进到 todos、confirmed_stages 追加 plans，并停止；不得在同一次调用中生成 05-实现清单/实现清单.md，也不得自动进入 todos。",
+      "files": []
     }
   ]
 }

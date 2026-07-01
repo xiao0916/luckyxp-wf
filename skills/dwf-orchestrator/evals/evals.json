@@ -4,13 +4,13 @@
     {
       "id": 1,
       "prompt": "我要开始做一个新项目，帮我按步骤推进，先从需求文档开始。项目叫'员工绩效看板'，目标是给 HR 团队看各部门季度绩效数据。",
-      "expected_output": "应当触发 dwf-orchestrator。首次初始化创建 .dwf/state.json 与 .dwf/specs/{今日日期}-feat-项目初始化/ 及其 01-需求/...05-实现清单/ 子目录骨架；specs 数组首项 status=active、current_step=requirements、is_shared_context=true；并在该 spec 目录写初始 _meta.json。代码不创建单独目录、直接放工作区根目录。orchestrator 自己不写需求文档正文，分派给 dwf-requirement 工作流模式。",
+      "expected_output": "应当触发 dwf-orchestrator。首次初始化创建 .dwf/state.json 与 .dwf/specs/{今日日期}-feat-项目初始化/ 及其 01-需求/...05-实现清单/ 子目录骨架；specs 数组首项 status=active、current_step=requirements、is_shared_context=true；并在该 spec 目录写初始 _meta.json。代码不创建单独目录、直接放工作区根目录。不创建空的 .dwf/pending/ 状态文件；只有出现未确认事项时才按需创建。orchestrator 自己不写需求文档正文，分派给 dwf-requirement 工作流模式。",
       "files": []
     },
     {
       "id": 2,
       "prompt": "继续上次的工作流，之前停在了实现清单阶段，现在帮我接着做。",
-      "expected_output": "读取 state.json.specs，找到 active spec（其 current_step 为 todos），按分派表把 dwf-development 分派在工作流模式处理该 spec 的 todos 阶段，文档写入 .dwf/specs/{active spec 目录名}/05-实现清单/。不重新初始化，不丢弃队列。",
+      "expected_output": "读取 state.json.specs，找到 active spec（其 current_step 为 todos），按分派表把 dwf-development 分派在工作流模式处理该 spec 的 todos 阶段，文档写入 .dwf/specs/{active spec 目录名}/05-实现清单/。不重新初始化，不丢弃队列。该次触发只分派 todos 阶段；实现清单确认并推进到 code 后必须停下，不得在同一次响应中继续触发 dwf-coding 或开始编码。",
       "files": []
     },
     {
@@ -22,7 +22,7 @@
     {
       "id": 4,
       "prompt": "把之前的整个工作流清掉，重新开始一个全新项目。",
-      "expected_output": "识别为重新开始请求。先用 question 进行二次风险确认，列出将被永久删除的 .dwf/（含 state.json 与全部 specs/ 含已完成/暂停/进行中所有 spec）以及工作区根目录下的项目代码文件，说明不可撤销。只有在用户二次选择确认删除后才执行删除并进入首次初始化。",
+      "expected_output": "识别为重新开始请求。先用 question 进行二次风险确认，默认待删范围只包含 .dwf/（含 state.json、pending/ 与全部 specs/ 含已完成/暂停/进行中所有 spec），说明不可撤销。不得默认删除根目录项目代码；如用户明确要求清理代码，必须先列出逐项待删清单并排除 skills/、.git/、agent 配置、仓库维护文档、脚本等非项目代码文件，只有用户逐项确认后才删除对应路径。",
       "files": []
     },
     {
@@ -46,7 +46,25 @@
     {
       "id": 8,
       "prompt": "我不小心把 .dwf/state.json 删了，但 specs 目录还在（含 _meta.json 和 _context.md），帮我恢复工作流。",
-      "expected_output": "扫 .dwf/specs/*/_meta.json 与 _context.md：status=done 的进 completed_specs，paused/active/pending 进 specs 队列；若 _context.md 与 _meta.json.shared_ref 不一致以 _meta.json 为准修正 _context.md；若有多个 active 降多余的为 pending 并经 question 确认。然后用 question 展示重建结果（队列顺序、谁共享上下文、谁兄弟 spec、引用时间戳），用户确认后写新 state.json（created_at/updated_at 重置为当前，iteration_count 取 completed_specs 长度），按队列恢复。若发现某兄弟 spec 的 _context.md 指向初始化 spec 已被删，用 question 告知共享上下文缺失并请用户决定放弃还是重新指定 shared_ref，不静默修复。",
+      "expected_output": "扫 .dwf/specs/*/_meta.json 与 _context.md：status=done 的进 completed_specs，paused/active/pending 进 specs 队列；若 _context.md 与 _meta.json.shared_ref 不一致，先记录为待修复项，不得在用户确认前写入；若有多个 active 降多余的为 pending 并经 question 确认。然后用 question 展示重建结果（队列顺序、谁共享上下文、谁兄弟 spec、引用时间戳、待修复 _context.md 漂移项），用户确认后写新 state.json（created_at/updated_at 重置为当前，iteration_count 取 completed_specs 长度）并按确认方案修正 _context.md，再按队列恢复。若发现某兄弟 spec 的 _context.md 指向初始化 spec 已被删，用 question 告知共享上下文缺失并请用户决定放弃还是重新指定 shared_ref，不静默修复。",
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "需求文档已经确认，但其中“待解决问题”有两项：A 我已经决定采用本地缓存；B 先跳过，下次迭代再定。继续推进。",
+      "expected_output": "orchestrator 应逐项处理待确认事项。对 A，把用户决策直接回写到当前 spec 的 01-需求/需求文档.md 的“待解决问题”对应列表项中，不写入待确认状态；对 B，按需创建 .dwf/pending/{当前 spec 目录名}/state.json，并把 B 写入 requirements 数组，其它 design/breakdown/plans/todos 数组为空。后续任意 spec 激活前应扫描 .dwf/pending/*/state.json 提醒未确认项；B 被解决后回写来源阶段文档并从 requirements 数组移除，若五个数组都为空则清理该 state.json/空目录。",
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "我只想单独生成一份技术方案，不要启动 DWF 工作流，也没有 .dwf/state.json。根据这个需求：做一个员工绩效看板，给我 2 个技术方案。",
+      "expected_output": "不应触发 dwf-orchestrator。应优先使用 dwf-development 的独立模式生成技术方案；不得创建 .dwf/state.json、不得创建 specs 队列、不得进入 orchestrator 的初始化或阶段推进流程。",
+      "files": []
+    },
+    {
+      "id": 11,
+      "prompt": "重新开始这个 DWF 项目，但这个仓库里还有 skills/、scripts/、docs/ 和 .git/，不要误删这些，只清理工作流状态。",
+      "expected_output": "识别为重新开始请求。question 的默认待删范围应只有 .dwf/，并明确不会删除 skills/、scripts/、docs/、.git/、AGENTS.md、agent 配置或其它仓库维护文件。若用户未逐项确认任何根目录项目代码路径，则只能删除 .dwf/；不得执行泛化的根目录清理。",
       "files": []
     }
   ]

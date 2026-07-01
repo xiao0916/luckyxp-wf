@@ -1,0 +1,43 @@
+﻿{
+  "skill_name": "skill-creation-workflow",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我创建一个新技能，用来把产品需求文档整理成开发任务清单。",
+      "expected_output": "agent 应先使用 brainstorming 与用户确认技能目标、触发场景、输出格式和测试策略，不应直接创建技能文件；用户确认后应说明将使用 skill-creator 创建技能，并要求新技能把中文强约束写入 `<HARD-GATE>`。",
+      "files": [],
+      "expectations": [
+        "输出中明确要求先使用 brainstorming 确认细节",
+        "输出中明确说明用户确认前不创建或修改技能文件",
+        "输出中明确要求后续使用 skill-creator",
+        "输出中要求新技能包含中文强约束，并优先写入 `<HARD-GATE>`"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "审计 skills/dev-workflow/SKILL.md，看看这个技能有没有问题。",
+      "expected_output": "agent 应先读取目标 SKILL.md，并按审计清单检查 frontmatter、description、中文强约束是否位于 `<HARD-GATE>`、确认门禁、eval 覆盖和产物路径；如需修改，应先通过 brainstorming 确认修改方案，再使用 skill-creator。",
+      "files": [],
+      "expectations": [
+        "输出中要求读取目标技能的 SKILL.md",
+        "输出中覆盖 frontmatter、description、中文强约束是否位于 `<HARD-GATE>` 和 eval 的审计项",
+        "输出中说明修改前需要用户确认",
+        "输出中说明修改必须使用 skill-creator"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "把我们刚才讨论的客服回复流程沉淀成一个 agent 技能，直接写吧。",
+      "expected_output": "agent 不应接受“直接写吧”而跳过流程；应说明必须先用 brainstorming 确认细节，确认后再用 skill-creator 创建，并把技能源码放在 skills/<技能名>/ 下。",
+      "files": [],
+      "expectations": [
+        "输出中拒绝跳过确认流程",
+        "输出中要求先使用 brainstorming",
+        "输出中要求确认后使用 skill-creator",
+        "输出中要求技能源码只写入 skills/<技能名>/"
+      ]
+    }
+  ]
+}
+
+

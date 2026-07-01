@@ -27,3 +27,14 @@ node_modules/
 dist/
 build/
 .cache/
+
+# Agent adapter directories
+.codex/
+.opencode/
+.cursor/
+.trae/
+
+# Skill generated outputs
+outputs/
+
+.venv/

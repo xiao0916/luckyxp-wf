@@ -1,0 +1,23 @@
+﻿{
+  "skill_name": "skill-test-workflow",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我测试 animation-flow 技能，用一个数字滚动的 prompt 跑一下，并记录测试结果。",
+      "expected_output": "应先读取 skills/animation-flow/SKILL.md，运行一个最小数字滚动样例，测试记录写入 test-results/animation-flow/，生成的预览、截图或临时 demo 写入 outputs/animation-flow/，不把运行产物放进 skills/animation-flow/。不能只做静态规则检查。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "用同一个 prompt 对比使用 dev-workflow 和不使用 dev-workflow 的表现，看看技能有没有帮助。",
+      "expected_output": "应建立 A/B 对比结构，记录 with-skill 与 without-skill 的输出位置。with-skill 至少应生成 dev-workflow 的最小真实运行产物，例如 .dwf/state.json 和 01-需求文档/需求文档.md；如果因确认门禁停止，应记录停在 requirements 等待确认。测试记录写入 test-results/dev-workflow/，运行产物写入 outputs/dev-workflow/<date>-ab-comparison/ 下的分组目录。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "跑一下某个技能自带的 evals，如果发现问题就更新技能。",
+      "expected_output": "应优先读取被测技能的 evals/，先把测试观察写入 test-results/<技能名>/，只在结论能改进通用行为或用户明确要求时才修改 SKILL.md 或 evals。",
+      "files": []
+    }
+  ]
+}
