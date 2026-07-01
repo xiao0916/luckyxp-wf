@@ -66,6 +66,12 @@
       "prompt": "重新开始这个 DWF 项目，但这个仓库里还有 skills/、scripts/、docs/ 和 .git/，不要误删这些，只清理工作流状态。",
       "expected_output": "识别为重新开始请求。question 的默认待删范围应只有 .dwf/，并明确不会删除 skills/、scripts/、docs/、.git/、AGENTS.md、agent 配置或其它仓库维护文件。若用户未逐项确认任何根目录项目代码路径，则只能删除 .dwf/；不得执行泛化的根目录清理。",
       "files": []
+    },
+    {
+      "id": 12,
+      "prompt": "继续推进吧，刚才需求文档已经生成出来了。",
+      "expected_output": "不得把这句话直接视为阶段文档整体确认。orchestrator 应读取 state.json 找到 active/current_step=requirements，并先用 question 询问是否确认当前需求文档整体通过；用户未确认前不得写 confirmed_stages、不得推进 current_step。用户确认整体通过后，必须读取 01-需求/需求文档.md 并扫描“待确认项/待确认事项/待解决问题”段；若有条目则逐项 question 处理，若段存在但不可解析则 question 询问跳过解析推进或返回修改。只有整体确认和待确认项处理都完成后，才能把 requirements 加入 confirmed_stages 并推进到下一阶段。",
+      "files": []
     }
   ]
 }
