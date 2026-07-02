@@ -14,7 +14,7 @@
 ## 运行模式与目标目录
 
 - **工作流模式**：`.dwf/state.json` 中存在 `status: "active"` 且 `current_step: "code"` 的 spec。目标 spec 目录为 `.dwf/specs/{spec.name}/`，目标代码目录为**工作区根目录**（DWF 约定：代码放根目录、不放 spec 目录内）。若 `shared_ref` 非空，可读取其 `01-需求/`、`02-设计稿/` 作为只读上下文。所有任务完成后把该 spec 从 `specs` 移入 `completed_specs`、递增 `iteration_count`、同步其 `_meta.json` 为 `status: "done"`。
-- **独立模式**：用 `question` 询问用户目标 spec 目录（默认 `.dwf/specs/{今日日期}-feat-{描述}`）和目标代码目录（默认工作区当前目录），由用户确认或修改。完成后停止，不创建 `.dwf/state.json`，不推进工作流状态。
+- **独立模式**：用 `question` 询问用户目标 spec 目录（默认 `.dwf/specs/{今日日期}-{seq}-feat-{描述}`，`seq` 扫描 `.dwf/specs/` 现有最大序号 +1，无则 001）和目标代码目录（默认工作区当前目录），由用户确认或修改。完成后停止，不创建 `.dwf/state.json`，不推进工作流状态。
 
 ## 必要输入
 

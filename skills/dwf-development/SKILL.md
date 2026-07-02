@@ -15,7 +15,7 @@ description: "当用户需要单独执行 DWF 工作流的需求分析、技术�
 
 2. **目标 spec 目录由运行模式决定，不由本技能臆造。**
    - 工作流模式：读取 `.dwf/state.json`，在 `specs` 数组中找 `status: "active"` 且 `current_step` 为 `breakdown`/`plans`/`todos` 之一的 spec，以 `.dwf/specs/{spec.name}` 作为目标 spec 目录。若该 spec 的 `shared_ref` 非空（兄弟 spec），优先读取 `.dwf/specs/{shared_ref}/01-需求/`、`/02-设计稿/` 作为只读参考上下文。
-   - 独立模式：`.dwf/state.json` 不存在或不存在满足条件的 active spec。先根据用户输入判断目标阶段；不明确时用 `question` 询问目标阶段。再用 `question` 询问用户目标目录，默认提议 `.dwf/specs/{今日日期}-feat-{描述}`，由用户确认或修改。
+    - 独立模式：`.dwf/state.json` 不存在或不存在满足条件的 active spec。先根据用户输入判断目标阶段；不明确时用 `question` 询问目标阶段。再用 `question` 询问用户目标目录，默认提议 `.dwf/specs/{今日日期}-{seq}-feat-{描述}`，其中 `seq` 扫描 `.dwf/specs/` 现有 spec 目录名中的最大序号 +1（无则 001），由用户确认或修改。
 
 3. **不要创建完整工作流目录。**
    只创建或更新当前阶段对应的目录和文档。不要主动创建 `01-需求/`、`02-设计稿/` 或其它非当前阶段目录。不要修改已有需求文档或设计稿。项目代码目录由 dwf-coding/用户决定，本技能不创建。
@@ -45,7 +45,7 @@ description: "当用户需要单独执行 DWF 工作流的需求分析、技术�
 
 - **独立模式**：`.dwf/state.json` 不存在或不存在 `current_step` 为 `breakdown`/`plans`/`todos` 的 active spec。
   - 先从用户输入判断目标阶段：需求拆解/需求分析对应 `breakdown`，技术方案对应 `plans`，实现清单对应 `todos`；无法判断时用 `question` 让用户选择一个目标阶段。
-  - 用 `question` 询问用户目标 spec 目录，默认提议 `.dwf/specs/{今日日期}-feat-{描述}`，由用户确认或修改。
+  - 用 `question` 询问用户目标 spec 目录，默认提议 `.dwf/specs/{今日日期}-{seq}-feat-{描述}`（`seq` 扫描 `.dwf/specs/` 现有 spec 目录名中的最大序号 +1，无则 001），由用户确认或修改。
   - 如目标 spec 目录不存在，只创建它及目标阶段对应的子目录：`breakdown` 创建 `03-需求分析/`，`plans` 创建 `04-技术方案/`，`todos` 创建 `05-实现清单/`。
   - 在该 spec 目录下写一份初始 `_meta.json`（`name` 为目录名、`status: "active"`、`current_step` 为目标阶段、`is_shared_context: false`、`shared_ref: null` 等）。
   - 不创建 `.dwf/state.json`，不推进完整工作流。

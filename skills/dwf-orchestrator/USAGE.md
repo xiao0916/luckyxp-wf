@@ -13,28 +13,28 @@
 
 ## 目录结构
 
-所有文档统一收纳进 `.dwf/specs/{date}-{type}-{描述}/` 下，代码放在工作区根目录：
+所有文档统一收纳进 `.dwf/specs/{date}-{seq}-{type}-{描述}/` 下，代码放在工作区根目录：
 
 ```
 工作区根目录/
 ├── .dwf/
 │   ├── state.json
 │   ├── pending/
-│   │   └── 2026-01-01-feat-项目初始化/
+│   │   └── 2026-01-01-001-feat-项目初始化/
 │   │       └── state.json    （仅有未确认事项时创建）
 │   └── specs/
-│       ├── 2026-01-01-feat-项目初始化/
+│       ├── 2026-01-01-001-feat-项目初始化/
 │       │   ├── 01-需求/
 │       │   ├── 02-设计稿/
 │       │   ├── 03-需求分析/
 │       │   ├── 04-技术方案/
 │       │   └── 05-实现清单/
-│       ├── 2026-01-10-bugfix-修复问题/    （迭代只含受影响阶段子目录）
-│       └── 2026-01-20-style-极简迭代/     （极简迭代可只含 01-需求/）
+│       ├── 2026-01-10-002-bugfix-修复问题/    （迭代只含受影响阶段子目录）
+│       └── 2026-01-20-003-style-极简迭代/     （极简迭代可只含 01-需求/）
 └── <项目代码文件直接在根目录>
 ```
 
-首个 `feat` spec 承载项目初始化；后续每个迭代新建一个 spec。极简迭代可只含 `01-需求/`。
+首个 `feat` spec 承载项目初始化；后续每个迭代新建一个 spec。目录名中的 `{seq}` 是三位全局序号（`001` 起，跨项目单调递增，由 `state.json.spec_seq` 维护）。极简迭代可只含 `01-需求/`。
 
 ## 何时触发本技能
 
@@ -72,6 +72,7 @@ requirements → design → breakdown → plans → todos → code
 `.dwf/state.json`：
 - `specs`：迭代队列（数组）。每个 spec 含 `name`/`status`/`current_step`/`design_skipped`/`selected_plan`/`affected_stages`/`confirmed_stages`/`is_shared_context`/`shared_ref`/`paused_at`/`pause_reason`/`started_at`/`completed_at`。同一时刻最多 1 个 `active`，其余是 `pending` 或 `paused`。完成则从数组移除。
 - `completed_specs`：已完成 spec 历史，仅含 `name` 与 `completed_at`。
+- `spec_seq`：已分配的全局 spec 序号，新建 spec 时自增并作为目录名中的三位序号。
 - `iteration_count`：已完成的迭代次数。
 - `project_name`/`created_at`/`updated_at`：项目级元数据。
 
@@ -108,7 +109,7 @@ spec 目录**不重命名**——状态只在 `_meta.json` 与 `state.json` 表�
 当初始化 spec 完成 `03-需求分析` 阶段、用户确认需求分析文档后，本技能判断需求是否较大，若是则用 `question` 询问是否拆分为多个迭代并发执行：
 
 - 不拆分：初始化 spec 继续走 `plans → todos → code`，产出完整项目
-- 拆分：在 `.dwf/specs/` 下新建兄弟 spec（如 `2026-01-01-feat-首页`、`2026-01-01-feat-新闻页`），追加为 `pending`
+- 拆分：在 `.dwf/specs/` 下新建兄弟 spec（如 `2026-01-01-002-feat-首页`、`2026-01-01-003-feat-新闻页`），追加为 `pending`
 - 兄弟 spec 写 `_meta.json`（`shared_ref` 指向初始化 spec）和 `_context.md`（列出依赖的初始化 spec 文档相对路径与引用时间戳）
 - 兄弟 spec 以初始化 spec 作为**共享上下文**——只读它已确认的 `01-需求/`、`02-设计稿/`，不重复生成项目级需求与设计稿
 - 兄弟 spec 通常从 `breakdown`/`plans` 起步（跳过 `requirements`/`design`）
@@ -145,4 +146,4 @@ dwf-orchestrator（编排：队列调度 + 状态机）
 
 ## 迁移说明
 
-旧 `dev-workflow` 项目的目录结构（`01-需求文档/`~`07-需求迭代/` + `06-code/`）与本技能的新结构（`.dwf/specs/` + 根目录代码）不兼容。迁移需要把旧目录的内容归并到 `.dwf/specs/{date}-feat-项目名/` 下的对应子目录，把 `06-code/` 内容移到根目录，并按新结构重建 `state.json`。建议在新项目上直接使用本技能，旧项目迁移前先备份。
+旧 `dev-workflow` 项目的目录结构（`01-需求文档/`~`07-需求迭代/` + `06-code/`）与本技能的新结构（`.dwf/specs/` + 根目录代码）不兼容。迁移需要把旧目录的内容归并到 `.dwf/specs/{date}-{seq}-feat-项目名/` 下的对应子目录，把 `06-code/` 内容移到根目录，并按新结构重建 `state.json`。建议在新项目上直接使用本技能，旧项目迁移前先备份。

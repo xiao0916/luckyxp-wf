@@ -15,7 +15,7 @@ description: "当用户需要单独执行 DWF 工作流的设计稿阶段时必�
 
 2. **目标 spec 目录由运行模式决定，不由本技能臆造。**
    - 工作流模式：读取 `.dwf/state.json`，在 `specs` 数组中找 `status: "active"` 且 `current_step: "design"` 的 spec，以 `.dwf/specs/{spec.name}` 作为目标 spec 目录。若该 spec 的 `shared_ref` 非空（兄弟 spec），优先读取 `.dwf/specs/{shared_ref}/01-需求/需求文档.md` 作为需求依据，而非本 spec 内的需求文档。
-   - 独立模式：`.dwf/state.json` 不存在或不存在满足条件的 active spec。用 `question` 询问用户目标目录，默认提议 `.dwf/specs/{今日日期}-feat-{描述}`，由用户确认或修改。
+    - 独立模式：`.dwf/state.json` 不存在或不存在满足条件的 active spec。用 `question` 询问用户目标目录，默认提议 `.dwf/specs/{今日日期}-{seq}-feat-{描述}`，其中 `seq` 扫描 `.dwf/specs/` 现有 spec 目录名中的最大序号 +1（无则 001），由用户确认或修改。
 
 3. **独立模式下不要创建或推进 `.dwf/state.json`。**
    独立模式只写目标 spec 目录下的设计稿与该 spec 的 `_meta.json`（如本技能创建该 spec）。不要把项目推进到 breakdown、plans、todos 或 code。只有工作流模式下才在用户确认后更新 state.json 中该 spec 的 `current_step`。
@@ -51,7 +51,7 @@ description: "当用户需要单独执行 DWF 工作流的设计稿阶段时必�
   - 遵循 dwf-orchestrator 的确认机制，不跳过用户确认。
 
 - **独立模式**：`.dwf/state.json` 不存在，或不存在满足条件的 active spec。
-  - 用 `question` 询问用户目标 spec 目录，默认提议 `.dwf/specs/{今日日期}-feat-{描述}`，由用户确认或修改。
+  - 用 `question` 询问用户目标 spec 目录，默认提议 `.dwf/specs/{今日日期}-{seq}-feat-{描述}`（`seq` 扫描 `.dwf/specs/` 现有 spec 目录名中的最大序号 +1，无则 001），由用户确认或修改。
   - 如目标 spec 目录不存在，创建它及其下 `02-设计稿/`、`02-设计稿/images/`。
   - 在该 spec 目录下写一份初始 `_meta.json`（`name` 为目录名、`status: "active"`、`current_step: "design"`、`is_shared_context: false`、`shared_ref: null` 等）。
   - 不要创建 `.dwf/state.json`，不推进完整工作流。

@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "已有需求文档，帮我生成设计稿。",
-      "expected_output": "独立模式：用 question 询问用户目标 spec 目录、设计稿来源（链接/图片/AI 生成/跳过）。默认目录提议 .dwf/specs/{今日日期}-feat-{描述}。若需求文档不存在于目标 spec 目录，按 shared_ref 或询问用户找依据。按 design_template 生成 {目标 spec 目录}/02-设计稿/设计稿.md，含项目名称、来源、设计说明、主色调、字体、间距、关键页面、交互、响应式、待确认项。不伪造图片路径。用 question 请求确认后停止，不创建 .dwf/state.json。",
+      "expected_output": "独立模式：用 question 询问用户目标 spec 目录、设计稿来源（链接/图片/AI 生成/跳过）。默认目录提议 .dwf/specs/{今日日期}-{seq}-feat-{描述}（seq 扫描现有最大序号 +1，无则 001）。若需求文档不存在于目标 spec 目录，按 shared_ref 或询问用户找依据。按 design_template 生成 {目标 spec 目录}/02-设计稿/设计稿.md，含项目名称、来源、设计说明、主色调、字体、间距、关键页面、交互、响应式、待确认项。不伪造图片路径。用 question 请求确认后停止，不创建 .dwf/state.json。",
       "files": []
     },
     {

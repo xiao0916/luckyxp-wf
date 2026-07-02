@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "我要开始做一个新项目，帮我按步骤推进，先从需求文档开始。项目叫'员工绩效看板'，目标是给 HR 团队看各部门季度绩效数据。",
-      "expected_output": "应当触发 dwf-orchestrator。首次初始化创建 .dwf/state.json 与 .dwf/specs/{今日日期}-feat-项目初始化/ 及其 01-需求/...05-实现清单/ 子目录骨架；specs 数组首项 status=active、current_step=requirements、is_shared_context=true；并在该 spec 目录写初始 _meta.json。代码不创建单独目录、直接放工作区根目录。不创建空的 .dwf/pending/ 状态文件；只有出现未确认事项时才按需创建。orchestrator 自己不写需求文档正文，分派给 dwf-requirement 工作流模式。",
+      "expected_output": "应当触发 dwf-orchestrator。首次初始化创建 .dwf/state.json 与 .dwf/specs/{今日日期}-001-feat-项目初始化/ 及其 01-需求/...05-实现清单/ 子目录骨架；state.json 的 spec_seq=1，specs 数组首项 status=active、current_step=requirements、is_shared_context=true；并在该 spec 目录写初始 _meta.json。代码不创建单独目录、直接放工作区根目录。不创建空的 .dwf/pending/ 状态文件；只有出现未确认事项时才按需创建。orchestrator 自己不写需求文档正文，分派给 dwf-requirement 工作流模式。",
       "files": []
     },
     {
@@ -16,7 +16,7 @@
     {
       "id": 3,
       "prompt": "我看工作区根目录某个按钮组件点击没反应，这块当时拆成了'首页/新闻页/详情页'三个迭代在 specs 队列里，现在要紧急修这个按钮的 bug。",
-      "expected_output": "识别为优先插入。用 question 确认要中断当前 active spec 后，把该 active status 改为 paused，写入 paused_at/pause_reason，并同步 _meta.json；然后在 specs 数组头部插入 {今日日期}-bugfix-导航按钮无响应 spec，status=active；新建对应 spec 目录（仅含受影响阶段子目录）与 _meta.json；按 current_step 分派对应子技能。确认 bug 修复走完代码后从队列移除，然后用 question 询问是否恢复被 paused 的原 spec。",
+      "expected_output": "识别为优先插入。用 question 确认要中断当前 active spec 后，把该 active status 改为 paused，写入 paused_at/pause_reason，并同步 _meta.json；然后把 state.json.spec_seq 自增，在 specs 数组头部插入 {今日日期}-{seq}-bugfix-导航按钮无响应 spec，status=active；新建对应 spec 目录（仅含受影响阶段子目录）与 _meta.json；按 current_step 分派对应子技能。确认 bug 修复走完代码后从队列移除，然后用 question 询问是否恢复被 paused 的原 spec。",
       "files": []
     },
     {
@@ -34,7 +34,7 @@
     {
       "id": 6,
       "prompt": "刚刚确认了 03-需求分析 文档，初始化 spec 覆盖首页、新闻页、详情页三个大模块，怎么继续？",
-      "expected_output": "此时 active spec 的 current_step 应已推进到 breakdown 末并写入 confirmed_stages。本技能用 question 询问是否拆分为多个迭代并发执行：如果用户同意拆分为首页/新闻页/详情页三个兄弟 spec，则分别创建 .dwf/specs/{今日日期}-feat-首页 等 spec 目录，仅含 breakdown/plans/todos 子目录，在 specs 队列追加为 pending，shared_ref 指向初始化 spec 目录名，is_shared_context=false；写各自 _meta.json。让用户确认执行顺序，然后继续推进初始化 spec 走 plans/todos/code（或直接收尾作为共享上下文），再依次激活兄弟 spec。",
+      "expected_output": "此时 active spec 的 current_step 应已推进到 breakdown 末并写入 confirmed_stages。本技能用 question 询问是否拆分为多个迭代并发执行：如果用户同意拆分为首页/新闻页/详情页三个兄弟 spec，则分别创建 .dwf/specs/{今日日期}-{seq}-feat-首页 等 spec 目录（seq 按 state.json.spec_seq 逐个自增），仅含 breakdown/plans/todos 子目录，在 specs 队列追加为 pending，shared_ref 指向初始化 spec 目录名，is_shared_context=false；写各自 _meta.json。让用户确认执行顺序，然后继续推进初始化 spec 走 plans/todos/code（或直接收尾作为共享上下文），再依次激活兄弟 spec。",
       "files": []
     },
     {
@@ -46,7 +46,7 @@
     {
       "id": 8,
       "prompt": "我不小心把 .dwf/state.json 删了，但 specs 目录还在（含 _meta.json 和 _context.md），帮我恢复工作流。",
-      "expected_output": "扫 .dwf/specs/*/_meta.json 与 _context.md：status=done 的进 completed_specs，paused/active/pending 进 specs 队列；若 _context.md 与 _meta.json.shared_ref 不一致，先记录为待修复项，不得在用户确认前写入；若有多个 active 降多余的为 pending 并经 question 确认。然后用 question 展示重建结果（队列顺序、谁共享上下文、谁兄弟 spec、引用时间戳、待修复 _context.md 漂移项），用户确认后写新 state.json（created_at/updated_at 重置为当前，iteration_count 取 completed_specs 长度）并按确认方案修正 _context.md，再按队列恢复。若发现某兄弟 spec 的 _context.md 指向初始化 spec 已被删，用 question 告知共享上下文缺失并请用户决定放弃还是重新指定 shared_ref，不静默修复。",
+      "expected_output": "扫 .dwf/specs/*/_meta.json 与 _context.md：status=done 的进 completed_specs，paused/active/pending 进 specs 队列；若 _context.md 与 _meta.json.shared_ref 不一致，先记录为待修复项，不得在用户确认前写入；若有多个 active 降多余的为 pending 并经 question 确认。然后用 question 展示重建结果（队列顺序、谁共享上下文、谁兄弟 spec、引用时间戳、待修复 _context.md 漂移项），用户确认后写新 state.json（created_at/updated_at 重置为当前，iteration_count 取 completed_specs 长度，spec_seq 取所有现存 spec 目录名中的最大序号）并按确认方案修正 _context.md，再按队列恢复。若发现某兄弟 spec 的 _context.md 指向初始化 spec 已被删，用 question 告知共享上下文缺失并请用户决定放弃还是重新指定 shared_ref，不静默修复。",
       "files": []
     },
     {

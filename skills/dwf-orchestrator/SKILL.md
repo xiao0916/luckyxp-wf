@@ -104,7 +104,7 @@ spec 队列状态：
 
 执行以下操作前必须读取 `references/orchestration-flows.md` 的对应章节：
 
-- **首次初始化**：创建 `.dwf/`、`.dwf/specs/`、首个 `{date}-feat-项目初始化` spec 骨架、初始 `state.json` 与 `_meta.json`，然后分派 `dwf-requirement`。不创建空待确认状态；首次出现未确认事项时再创建 `.dwf/pending/<迭代目录名>/state.json`。
+- **首次初始化**：创建 `.dwf/`、`.dwf/specs/`、首个 `{date}-{seq}-feat-项目初始化` spec 骨架、初始 `state.json` 与 `_meta.json`，然后分派 `dwf-requirement`。不创建空待确认状态；首次出现未确认事项时再创建 `.dwf/pending/<迭代目录名>/state.json`。
 - **拆分迭代**：只在初始化 spec 的 `breakdown` 已确认且用户同意后执行。兄弟 spec 写 `shared_ref` 与 `_context.md`，入队为 `pending`，执行顺序经 `question` 确认。
 - **迭代完成**：将 active spec 标为 `done`，同步 `_meta.json`，从 `specs` 移入 `completed_specs`，递增 `iteration_count`，再决定是否激活下一个 spec。
 - **新增迭代**：项目稳定或编码阶段收到新变更时，确认 spec 名、`affected_stages`、目录骨架与队列位置。

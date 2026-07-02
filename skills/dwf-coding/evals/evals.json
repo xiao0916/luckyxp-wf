@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "帮我根据实现清单开始编码。",
-      "expected_output": "独立模式（无 .dwf/state.json 或无 active+code 的 spec）：用 question 询问目标 spec 目录（默认 .dwf/specs/{今日日期}-feat-{描述}）和目标代码目录（默认工作区当前目录）。读取该 spec 下 05-实现清单/、04-技术方案/、本技能目录下 references/coding_standards.md。按任务顺序逐项实现，对照“编码规范检查”和“验证标准”自检并运行可用 lint/typecheck/test。每完成一项把 [ ] 改为 [x] 写入目标 spec 目录的实现清单。不创建 .dwf/state.json。",
+      "expected_output": "独立模式（无 .dwf/state.json 或无 active+code 的 spec）：用 question 询问目标 spec 目录（默认 .dwf/specs/{今日日期}-{seq}-feat-{描述}，seq 扫描现有最大序号 +1，无则 001）和目标代码目录（默认工作区当前目录）。读取该 spec 下 05-实现清单/、04-技术方案/、本技能目录下 references/coding_standards.md。按任务顺序逐项实现，对照“编码规范检查”和“验证标准”自检并运行可用 lint/typecheck/test。每完成一项把 [ ] 改为 [x] 写入目标 spec 目录的实现清单。不创建 .dwf/state.json。",
       "files": []
     },
     {

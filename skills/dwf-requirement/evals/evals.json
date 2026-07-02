@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "我想把一个想法整理成需求文档：做一个团队 OKR 看板，希望按周期查看目标、关键结果、负责人和进度。",
-      "expected_output": "独立模式：用 question 询问用户目标 spec 目录，默认提议 .dwf/specs/{今日日期}-feat-{描述}，由用户确认。信息不足则一次一个问题追问（项目名、背景、用户、范围、约束、验收）。在 {目标 spec 目录}/01-需求/需求文档.md 按 references/requirements_template.md 生成中文需求文档，含 frontmatter、业务流程 Mermaid、FR/NFR 编号、MoSCoW 优先级、验收标准。用 question 请求确认后停止。不创建 .dwf/state.json，不推进到 design/breakdown 等阶段。",
+      "expected_output": "独立模式：用 question 询问用户目标 spec 目录，默认提议 .dwf/specs/{今日日期}-{seq}-feat-{描述}（seq 扫描现有最大序号 +1，无则 001），由用户确认。信息不足则一次一个问题追问（项目名、背景、用户、范围、约束、验收）。在 {目标 spec 目录}/01-需求/需求文档.md 按 references/requirements_template.md 生成中文需求文档，含 frontmatter、业务流程 Mermaid、FR/NFR 编号、MoSCoW 优先级、验收标准。用 question 请求确认后停止。不创建 .dwf/state.json，不推进到 design/breakdown 等阶段。",
       "files": []
     },
     {

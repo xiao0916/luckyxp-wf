@@ -13,7 +13,7 @@
 ## 运行模式与目标目录
 
 - **工作流模式**：`.dwf/state.json` 中存在 `status: "active"` 且 `current_step: "design"` 的 spec。目标 spec 目录为 `.dwf/specs/{spec.name}/`。若该 spec 的 `shared_ref` 非空（兄弟 spec），优先读取 `.dwf/specs/{shared_ref}/01-需求/` 作为只读上下文。用户确认后把该 spec 推进到 `breakdown`。
-- **独立模式**：用 `question` 询问用户目标 spec 目录，默认提议 `.dwf/specs/{今日日期}-feat-{描述}`，由用户确认或修改。生成后停止，不创建 `.dwf/state.json`，不推进后续阶段。
+- **独立模式**：用 `question` 询问用户目标 spec 目录，默认提议 `.dwf/specs/{今日日期}-{seq}-feat-{描述}`（`seq` 扫描 `.dwf/specs/` 现有最大序号 +1，无则 001），由用户确认或修改。生成后停止，不创建 `.dwf/state.json`，不推进后续阶段。
 
 ## 默认产物
 

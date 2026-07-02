@@ -14,7 +14,7 @@
 ## 运行模式与目标目录
 
 - **工作流模式**：`.dwf/state.json` 中存在 `status: "active"` 且 `current_step` 为 `breakdown`/`plans`/`todos` 之一的 spec。目标 spec 目录为 `.dwf/specs/{spec.name}/`。若 `shared_ref` 非空，优先读取 `.dwf/specs/{shared_ref}/01-需求/`、`/02-设计稿/` 作为只读上下文。只处理当前 `current_step` 对应的阶段；确认后更新该 spec 的 `current_step` 与 `confirmed_stages`，同步 `_meta.json` 与 `updated_at`，然后停止。
-- **独立模式**：先用 `question` 确认目标阶段，再询问目标 spec 目录，默认提议 `.dwf/specs/{今日日期}-feat-{描述}`，由用户确认或修改。当前阶段确认后停止，不创建 `.dwf/state.json`，不推进后续阶段。
+- **独立模式**：先用 `question` 确认目标阶段，再询问目标 spec 目录，默认提议 `.dwf/specs/{今日日期}-{seq}-feat-{描述}`（`seq` 扫描 `.dwf/specs/` 现有最大序号 +1，无则 001），由用户确认或修改。当前阶段确认后停止，不创建 `.dwf/state.json`，不推进后续阶段。
 
 ## 阶段映射
 

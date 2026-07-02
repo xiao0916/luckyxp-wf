@@ -50,10 +50,11 @@
 进入条件：`.dwf/state.json` 不存在且 `.dwf/specs/` 不存在，或用户明确请求开始全新项目并已通过二次确认。
 
 1. 创建 `.dwf/`、`.dwf/specs/`。
-2. 创建首个 spec 目录，命名 `{今日日期}-feat-项目初始化`，或使用用户确认的描述。
+2. 把 `state.json` 的 `spec_seq` 自增为 `1`（初始为 `0`），创建首个 spec 目录，命名 `{今日日期}-001-feat-项目初始化`，或使用用户确认的描述。
 3. 在首个 spec 下创建 `01-需求/`、`02-设计稿/`、`02-设计稿/images/`、`03-需求分析/`、`04-技术方案/`、`05-实现清单/`。
 4. 写入 `.dwf/state.json`：
    - `project_name`：从用户输入提取或询问。
+   - `spec_seq`：`1`（首次初始化分配的第一个序号）。
    - `specs`：仅包含首个 spec，`status: "active"`、`current_step: "requirements"`、`design_skipped: false`、`selected_plan: null`、`affected_stages` 含全部阶段、`confirmed_stages: []`、`is_shared_context: true`、`shared_ref: null`、`started_at` 为当前时间。
    - `completed_specs: []`、`iteration_count: 0`、`created_at`、`updated_at`。
 5. 在首个 spec 目录写 `_meta.json`，内容与 `state.json.specs[0]` 镜像。
@@ -107,7 +108,7 @@
 
 1. 基于已确认的 `03-需求分析/需求分析文档.md` 列出可独立拆分的功能模块或页面。
 2. 用 `question` 与用户确认拆分为哪些兄弟 spec、每个描述、起始阶段和执行顺序。
-3. 为每个兄弟 spec 创建 `.dwf/specs/{今日日期}-feat-{描述}/`。
+3. 为每个兄弟 spec 创建 `.dwf/specs/{今日日期}-{seq}-feat-{描述}/`，`seq` 取自 `state.json.spec_seq` 自增后的值（每个兄弟 spec 各自自增一次，按创建顺序递增）。
 4. 仅创建其 `affected_stages` 对应的子目录。兄弟 spec 通常跳过 `requirements` 和 `design`，从 `breakdown` 或 `plans` 起步；若仍需页面级设计，可保留 `02-设计稿/`。
 5. 在 `state.json.specs` 数组按执行顺序追加兄弟 spec：
    - `status: "pending"`
@@ -143,7 +144,7 @@
 
 进入条件：队列为空，或 `active` spec 处于 `code` 阶段且用户提出新的变更需求。
 
-1. 根据用户描述提议 spec 名 `{今日日期}-{type}-{描述}`，`type` 采用 conventional-commit 前缀。
+1. 根据用户描述提议 spec 名 `{今日日期}-{seq}-{type}-{描述}`，`type` 采用 conventional-commit 前缀，`seq` 取 `state.json.spec_seq` 自增后的值。
 2. 用 `question` 请用户确认名称。
 3. 分析变更影响哪些阶段，提出 `affected_stages`，按默认阶段顺序排列。用户跳过设计稿则排除 `design`。
 4. 用 `question` 请用户确认或调整 `affected_stages`。
@@ -169,7 +170,7 @@
 
 1. 用 `question` 确认是否中断当前 spec。选项应包含暂停当前 spec、稍后再插、拒绝插入继续当前 spec。
 2. 用户确认暂停后，把当前 `active` spec 的 `status` 改为 `paused`，写入 `paused_at` 与 `pause_reason`，并同步 `_meta.json`。
-3. 创建新优先 spec，命名、目录和 `affected_stages` 同新增迭代。
+3. 创建新优先 spec，命名、目录和 `affected_stages` 同新增迭代（`seq` 取 `state.json.spec_seq` 自增后的值）。
 4. 在 `state.json.specs` 数组头部插入新 spec，`status: "active"`、`started_at` 为当前时间。
 5. 按其 `current_step` 分派对应子技能。
 6. 优先 spec 完成并被移除后，激活或恢复下一个 spec 前先执行递延项提醒。
@@ -283,6 +284,6 @@
    - `active` 或 `pending` 写入 `specs` 队列并保持原状态。
 5. 若存在多个 `active`，保留第一个为 `active`，其余降级为 `pending`，并用 `question` 与用户确认。
 6. 用 `question` 向用户展示重建结果：队列顺序、各 spec 状态、谁是共享上下文、谁是兄弟 spec、`_context.md` 中记录的引用时间戳，以及所有待修复的 `_context.md` 漂移项。
-7. 用户确认后写新的 `state.json`，`created_at`、`updated_at` 使用当前时间，`iteration_count` 取 `completed_specs` 长度；随后再按已确认方案修正 `_context.md` 漂移项。
+7. 用户确认后写新的 `state.json`，`created_at`、`updated_at` 使用当前时间，`iteration_count` 取 `completed_specs` 长度，`spec_seq` 取所有现存 spec 目录名中提取的最大序号（无 spec 时为 `0`）；随后再按已确认方案修正 `_context.md` 漂移项。
 8. 若 `.dwf/pending/*/state.json` 仍存在且含未确认项，重建后即将激活 spec 前执行递延项提醒。
 9. 若兄弟 spec 的 `_context.md` 指向的初始化 spec 目录已被删除，用 `question` 告知共享上下文缺失，请用户决定放弃该 spec，或以当前可得的最新需求/设计稿作为新共享上下文重新指定 `shared_ref` 并重写 `_context.md`。不要静默修复。

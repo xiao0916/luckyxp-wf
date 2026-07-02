@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "帮我针对饮水记录 App 这个需求做需求分析。",
-      "expected_output": "独立模式：用 question 询问用户目标 spec 目录，默认提议 .dwf/specs/{今日日期}-feat-{描述}。确认后在 {目标 spec 目录}/03-需求分析/需求分析文档.md 生成中文需求分析文档，覆盖目标端、页面与功能拆解、素材/依赖清单、范围边界。用 question 请求确认后停止。不创建 .dwf/state.json。",
+      "expected_output": "独立模式：用 question 询问用户目标 spec 目录，默认提议 .dwf/specs/{今日日期}-{seq}-feat-{描述}（seq 扫描现有最大序号 +1，无则 001）。确认后在 {目标 spec 目录}/03-需求分析/需求分析文档.md 生成中文需求分析文档，覆盖目标端、页面与功能拆解、素材/依赖清单、范围边界。用 question 请求确认后停止。不创建 .dwf/state.json。",
       "files": []
     },
     {
@@ -16,7 +16,7 @@
     {
       "id": 3,
       "prompt": "生成实现清单。",
-      "expected_output": "独立模式：用 question 询问目标 spec 目录（默认 .dwf/specs/{今日日期}-feat-{描述}）并由用户确认。读取 01-需求/、03-需求分析/、04-技术方案/（若有 selected_plan 以其为主）。在 {目标 spec 目录}/05-实现清单/实现清单.md 写出有序、具体、按依赖排序、带优先级与“编码规范检查”和“验证标准”的任务清单。用 question 请求确认后停止。不创建 .dwf/state.json。",
+      "expected_output": "独立模式：用 question 询问目标 spec 目录（默认 .dwf/specs/{今日日期}-{seq}-feat-{描述}，seq 扫描现有最大序号 +1，无则 001）并由用户确认。读取 01-需求/、03-需求分析/、04-技术方案/（若有 selected_plan 以其为主）。在 {目标 spec 目录}/05-实现清单/实现清单.md 写出有序、具体、按依赖排序、带优先级与“编码规范检查”和“验证标准”的任务清单。用 question 请求确认后停止。不创建 .dwf/state.json。",
       "files": []
     },
     {
