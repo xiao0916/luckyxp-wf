@@ -7,9 +7,27 @@
 | 技能 | 一句话用途 | 适用场景 |
 |------|-----------|----------|
 | [animation-flow](skills/animation-flow/) | 把预置网页动画效果落地成项目组件 | 数字滚动、Hover 光效、手风琴、定屏滚动、文字打字等 |
-| [dev-workflow](skills/dev-workflow/) | 把需求按 6 个阶段逐步变成可交付代码 | 新功能/新项目的系统化开发，含迭代机制 |
+| [dev-workflow](skills/dev-workflow/) | 把需求按 6 个阶段逐步变成可交付代码 | 新功能/新项目的系统化开发（旧版一体化技能，新项目推荐用下方 DWF 家族） |
+| [dwf-orchestrator](skills/dwf-orchestrator/) | DWF 开发工作流统一调度入口 | 启动/继续/恢复/重启工作流，迭代与队列编排 |
+| [dwf-requirement](skills/dwf-requirement/) | 整理需求为 DWF 需求文档 | 生成 PRD、规范化需求 |
+| [dwf-design](skills/dwf-design/) | 执行 DWF 设计稿阶段 | 生成/记录设计稿 |
+| [dwf-development](skills/dwf-development/) | 执行需求分析/技术方案/实现清单之一 | 需求拆解、技术方案、实现清单 |
+| [dwf-coding](skills/dwf-coding/) | 执行 DWF 编码阶段 | 按实现清单逐项编码与验证 |
+| [skill-creation-workflow](skills/skill-creation-workflow/) | 创建、修改、审计 AI agent 技能 | 新建技能、改进已有技能、补充 eval |
+| [skill-test-workflow](skills/skill-test-workflow/) | 测试、评估、对比 AI agent 技能 | 跑 eval、A/B 对比、记录测试观察 |
+| [toolchain-issue-recovery](skills/toolchain-issue-recovery/) | 工具链问题诊断与经验沉淀 | 沙箱异常、权限/路径问题、编码误判、命令不兼容等 |
 
 每个技能目录下有 `USAGE.md`，是面向使用者的快速上手指南。
+
+### DWF 开发工作流
+
+`dwf-orchestrator` 与 `dwf-requirement` / `dwf-design` / `dwf-development` / `dwf-coding` 组成「编排 + 子技能」分层的开发工作流（DWF）。编排层只读 `.dwf/state.json`、分派阶段、推进状态机；子技能各自负责一个阶段的文档或代码产出。
+
+- 默认阶段顺序：`requirements → design → breakdown → plans → todos → code`
+- 每个迭代是一个 spec 目录，命名 `{date}-{seq}-{type}-{描述}`（如 `2026-01-01-001-feat-项目初始化`），`seq` 为三位全局递增序号
+- 文档收纳在 `.dwf/specs/<spec 目录名>/`，项目代码放工作区根目录
+
+旧项目可继续用 `dev-workflow` 一体化技能；新项目推荐直接用 DWF 家族。
 
 ---
 
@@ -46,6 +64,7 @@ npx skills add https://github.com/xiao0916/luckyxp-wf.git --agent claude-code
 ```bash
 npx skills add https://github.com/xiao0916/luckyxp-wf.git --skill animation-flow
 npx skills add https://github.com/xiao0916/luckyxp-wf.git --skill dev-workflow
+npx skills add https://github.com/xiao0916/luckyxp-wf.git --skill dwf-orchestrator
 ```
 
 **一键装全部技能到全部 agent：**
@@ -69,8 +88,9 @@ npx skills add <仓库> -l      # 只列出仓库内可用技能，不安装
 
 ```bash
 git clone https://github.com/xiao0916/luckyxp-wf.git /tmp/achievement
-cp -r /tmp/achievement/skills/animation-flow <目标 agent 技能目录>/
-cp -r /tmp/achievement/skills/dev-workflow  <目标 agent 技能目录>/
+cp -r /tmp/achievement/skills/animation-flow  <目标 agent 技能目录>/
+cp -r /tmp/achievement/skills/dev-workflow   <目标 agent 技能目录>/
+cp -r /tmp/achievement/skills/dwf-orchestrator <目标 agent 技能目录>/
 ```
 
 各 agent 约定技能目录（全局 / 项目级）：
